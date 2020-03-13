@@ -6,7 +6,8 @@ import design  # Это наш конвертированный файл диз�
 from OpenGL.GL import *
 # from OpenGL.GLU import *
 import math
-from geometry.entity_2d import Point, Line
+from geometry.entity_2d import Point, Segment
+from ontogeny.plant import engender_random_buds
 # import random
 # import time
 
@@ -32,18 +33,19 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         # self.draw(lines)
         quit_mode = False
         while not quit_mode:
-            p1 = Point(0, 0)
-            p2 = create_point(p1, 0.1, 45)
-            p3 = create_point(p2, 0.1, 90)
-            p4 = create_point(p3, 0.1, 135)
-            p5 = create_point(p4, 0.1, 180)
-            p6 = create_point(p5, 0.1, 225)
-            p7 = create_point(p6, 0.1, 270)
-            p8 = create_point(p7, 0.1, 315)
-            p9 = create_point(p8, 0.1, 360)
-            p10 = create_point(p9, 0.1, 45)
+            p1 = Point(0, -1)
+            p2 = create_point(p1, 0.5, 90)
+            p3, p4 = engender_random_buds(Segment(p1, p2), 2)
+            p5 = create_point(p3, 0.1, 45)
+            p6 = create_point(p4, 0.1, 135)
+            # p5 = create_point(p4, 0.1, 180)
+            # p6 = create_point(p5, 0.1, 225)
+            # p7 = create_point(p6, 0.1, 270)
+            # p8 = create_point(p7, 0.1, 315)
+            # p9 = create_point(p8, 0.1, 360)
+            # p10 = create_point(p9, 0.1, 45)
 
-            z = [Line(p1, p2), Line(p2, p3), Line(p3, p4), Line(p4, p5), Line(p5, p6), Line(p6, p7), Line(p7, p8), Line(p8, p9), Line(p9, p10)]
+            z = [Segment(p1, p2), Segment(p3, p5), Segment(p4, p6)]
             # Белый цвет фона
             glClearColor(1, 1, 1, 1)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -107,7 +109,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                         quit_mode = True
 
     @staticmethod
-    def draw(lines: List[Line]):
+    def draw(lines: List[Segment]):
         # Черный цвет пера для отображения прямых
         glColor3f(0.0, 0.0, 0.0)
         glLineWidth(2)
