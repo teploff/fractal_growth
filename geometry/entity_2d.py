@@ -44,7 +44,7 @@ class Segment:
         :return: Велична длины отрезка
         """
 
-        return math.sqrt((self.finish.x - self.start.x) ** 2 + (self.finish.y - self.start.x) ** 2)
+        return math.sqrt((self.finish.x - self.start.x) ** 2 + (self.finish.y - self.start.y) ** 2)
 
     def find_point(self, value: float, axis: Union[ABSCISSA, ORDINATE]) -> Point:
         """
