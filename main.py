@@ -4,10 +4,11 @@ import sys  # sys нужен для передачи argv в QApplication
 from PyQt5 import QtWidgets
 import design  # Это наш конвертированный файл дизайна
 from OpenGL.GL import *
+from anytree import RenderTree
 # from OpenGL.GLU import *
-import math
 from geometry.entity_2d import Point, Segment
-from ontogeny.plant import engender_random_buds
+from ontogeny.plant import engender_random_buds, engender_branch, TreeBranch
+
 # import random
 # import time
 
@@ -34,18 +35,45 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         quit_mode = False
         while not quit_mode:
             p1 = Point(0, -1)
-            p2 = create_point(p1, 0.5, 90)
-            p3, p4 = engender_random_buds(Segment(p1, p2), 2)
-            p5 = create_point(p3, 0.1, 45)
-            p6 = create_point(p4, 0.1, 135)
+            p2 = engender_branch(p1, 0.5, 90)
+            l1 = Segment(p1, p2)
+            print("Angle = ", l1.get_triangle_angle())
+            root = TreeBranch(l1)
+            p3, p4 = engender_random_buds(l1, 2)
+            p5 = engender_branch(p3, 0.4, 45)
+            p6 = engender_branch(p4, 0.4, 135)
+            l2 = Segment(p3, p5)
+            print("Angle 2 = ", l2.get_triangle_angle())
+            l3 = Segment(p4, p6)
+            print("Angle 3 = ", l3.get_triangle_angle())
+            node1 = TreeBranch(l2, parent=root)
+            node2 = TreeBranch(l3, parent=root)
+            p7, p8 = engender_random_buds(Segment(p3, p5), 2)
+            p9 = engender_branch(p7, 0.3, 67.5)
+            p10 = engender_branch(p8, 0.2, 22.5)
+            l4 = Segment(p7, p9)
+            l5 = Segment(p8, p10)
+            node3 = TreeBranch(l4, parent=node1)
+            node4 = TreeBranch(l5, parent=node1)
+            p11, p12 = engender_random_buds(Segment(p4, p6), 2)
+            p13 = engender_branch(p11, 0.4, 157.5)
+            p14 = engender_branch(p12, 0.4, 112.5)
+            l6 = Segment(p12, p14)
+            l7 = Segment(p11, p13)
+            node5 = TreeBranch(l6, parent=node2)
+            node6 = TreeBranch(l7, parent=node2)
+            for pre, fill, node in RenderTree(root):
+                print("%s%s" % (pre, node))
+            print("1 = ", node1.get_branch(1))
+            print("2 = ", node1.get_branch(2))
+            print("3 = ", node1.get_branch(2))
             # p5 = create_point(p4, 0.1, 180)
             # p6 = create_point(p5, 0.1, 225)
             # p7 = create_point(p6, 0.1, 270)
             # p8 = create_point(p7, 0.1, 315)
             # p9 = create_point(p8, 0.1, 360)
             # p10 = create_point(p9, 0.1, 45)
-
-            z = [Segment(p1, p2), Segment(p3, p5), Segment(p4, p6)]
+            z = [l1, l2, l3, l4, l5, l6, l7]
             # Белый цвет фона
             glClearColor(1, 1, 1, 1)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -115,24 +143,9 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         glLineWidth(2)
         glBegin(GL_LINES)
         for line in lines:
-            glVertex2f(line.point_1.x, line.point_1.y)
-            glVertex2f(line.point_2.x, line.point_2.y)
+            glVertex2f(line.start.x, line.start.y)
+            glVertex2f(line.finish.x, line.finish.y)
         glEnd()
-
-
-def create_point(point: Point, distance: float, angle: float) -> Point:
-    """
-
-    :param point: Начальная точка с координатами x и y
-    :param distance: Расстояние, на котором будет находиться новая точка
-    :param angle: Угол поворота
-    :return: Новая точка с координатами x и y
-    """
-
-    x = point.x + (distance * math.cos(angle * math.pi / 180.0))
-    y = point.y + (distance * math.sin(angle * math.pi / 180.0))
-
-    return Point(x, y)
 
 
 def main():

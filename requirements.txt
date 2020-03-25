@@ -1,5 +1,7 @@
-numpy==1.18.1
+anytree==2.8.0
+numpy==1.18.2
 pygame==1.9.6
 PyOpenGL==3.1.5
 PyQt5==5.14.1
 PyQt5-sip==12.7.1
+six==1.14.0

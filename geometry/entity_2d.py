@@ -1,8 +1,10 @@
 import math
+import numpy
 from typing import Union
 
 ABSCISSA = 'x'
 ORDINATE = 'y'
+DELTA = 0.001
 
 
 class Point:
@@ -18,19 +20,22 @@ class Point:
         self.x = x
         self.y = y
 
+    def __repr__(self):
+        return f'Point({self.x:.5f}, {self.y:.5f})'
+
 
 class Segment:
     """
     Класс отрезок, содержащая две точки: начальная и конечная
     """
-    def __init__(self, point_1: Point, point_2: Point):
+    def __init__(self, start: Point, finish: Point):
         """
-        :param point_1: Начальная точка
-        :param point_2: Конечная точка
+        :param start: Начальная точка
+        :param finish: Конечная точка
         """
 
-        self.point_1 = point_1
-        self.point_2 = point_2
+        self.start = start
+        self.finish = finish
 
     def length(self) -> float:
         """
@@ -39,7 +44,7 @@ class Segment:
         :return: Велична длины отрезка
         """
 
-        return math.sqrt((self.point_2.x - self.point_1.x) ** 2 + (self.point_2.y - self.point_1.x) ** 2)
+        return math.sqrt((self.finish.x - self.start.x) ** 2 + (self.finish.y - self.start.x) ** 2)
 
     def find_point(self, value: float, axis: Union[ABSCISSA, ORDINATE]) -> Point:
         """
@@ -51,30 +56,72 @@ class Segment:
 
         # Принадлежит ли значение value отрезку в диапазоне множества координат x
         if axis == ABSCISSA:
-            if not min(self.point_1.x, self.point_2.x) <= value <= max(self.point_1.x, self.point_2.x):
+            if not min(self.start.x, self.finish.x) <= value <= max(self.start.x, self.finish.x):
                 raise ValueError('The value does not belong to x coordinate range')
         # Принадлежит ли значение value отрезку в диапазоне множества координат y
         else:
-            if not min(self.point_1.y, self.point_2.y) <= value <= max(self.point_1.y, self.point_2.y):
+            if not min(self.start.y, self.finish.y) <= value <= max(self.start.y, self.finish.y):
                 raise ValueError('The value does not belong to y coordinate range')
 
         # Если вырожденный случай, отрезок перпендикулярен Ох
-        if abs(self.point_1.x - self.point_2.x) == 0:
+        if abs(self.start.x - self.finish.x) == 0:
             if axis == ABSCISSA:
                 raise ValueError('The line is perpendicular to the x axis')
-            return Point(self.point_1.x, value)
+            return Point(self.start.x, value)
 
         # Уровнение прямой имеет вид: y = kx + b.
         # Уровнение прямой через две заданные точки имеет вид:  y - y1 = k * (x - x1), где
         # k = (y1 - y2) / (x1 - x2)
 
-        k = (self.point_1.y - self.point_2.y) / (self.point_1.x - self.point_2.x)
+        k = (self.start.y - self.finish.y) / (self.start.x - self.finish.x)
 
         if axis == ABSCISSA:
             x = value
-            y = k * (x - self.point_1.x) + self.point_1.y
+            y = k * (x - self.start.x) + self.start.y
         else:
             y = value
-            x = (y - self.point_1.y) / k + self.point_1.x
+            x = (y - self.start.y) / k + self.start.x
 
         return Point(x, y)
+
+    def get_triangle_angle(self) -> float:
+        """
+        Вычислить угол поворота или меру поворота подвижного радиус-вектора относительно его начального положения.
+        Подробнее тут: http://twt.mpei.ac.ru/math/TRIG/TR_010100.html
+        :return: Положительное значение угла поворота
+        """
+
+        # Если отрезок расположен перпендикулярно абсциссе
+        if math.isclose(self.start.x, self.finish.x, abs_tol=DELTA):
+            if self.start.y > self.finish.y:
+                return 270.0
+            else:
+                return 90.0
+
+        # Если отрезок расположен перпендикулярно ординате
+        if math.isclose(self.start.y, self.finish.y, abs_tol=DELTA):
+            if self.start.x > self.finish.x:
+                return 180.0
+            else:
+                return 0.0
+
+        # https://www.mathopenref.com/coordslope.html
+        m = (self.finish.y - self.start.y) / (self.finish.x - self.start.x)
+        angle = numpy.rad2deg(math.atan(m))
+
+        # Значение arctan может быть положительно в 1 и 3 червертях и отрицательно в 2 и 4 соответственно.
+        # Поэтому необходимо сделать некоторые преобразования.
+        # 2 или 4 четверть
+        if angle < 0:
+            if self.finish.y > self.start.y:
+                angle += 180.0
+            else:
+                angle += 360.0
+        # 1 или 3 четверть
+        else:
+            if self.finish.y > self.start.y:
+                pass
+            else:
+                angle += 180.0
+
+        return angle
