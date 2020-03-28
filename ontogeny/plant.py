@@ -2,7 +2,8 @@ import math
 import numpy
 from typing import List
 
-from geometry.entity_2d import ABSCISSA, ORDINATE, Point, Segment
+from geometry.constants import ABSCISSA, ORDINATE
+from geometry.entity_2d import Point, Segment
 
 
 def engender_branch(bud: Point, length: float, angle: float) -> Point:

@@ -1,10 +1,7 @@
 import math
 import numpy
 from typing import Union
-
-ABSCISSA = 'x'
-ORDINATE = 'y'
-ACCURACY = 0.001
+from geometry.constants import ABSCISSA, ORDINATE, ACCURACY
 
 
 class Point:
