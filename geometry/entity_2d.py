@@ -4,13 +4,14 @@ from typing import Union
 
 ABSCISSA = 'x'
 ORDINATE = 'y'
-DELTA = 0.001
+ACCURACY = 0.001
 
 
 class Point:
     """
     Класс точка, содержащая две координаты x и y
     """
+
     def __init__(self, x: float, y: float):
         """
         :param x: Координата x
@@ -28,6 +29,7 @@ class Segment:
     """
     Класс отрезок, содержащая две точки: начальная и конечная
     """
+
     def __init__(self, start: Point, finish: Point):
         """
         :param start: Начальная точка
@@ -37,7 +39,7 @@ class Segment:
         self.start = start
         self.finish = finish
 
-    def length(self) -> float:
+    def len(self) -> float:
         """
         Вычисление длины отрезка
 
@@ -46,9 +48,37 @@ class Segment:
 
         return math.sqrt((self.finish.x - self.start.x) ** 2 + (self.finish.y - self.start.y) ** 2)
 
-    def find_point(self, value: float, axis: Union[ABSCISSA, ORDINATE]) -> Point:
+    def does_point_belong(self, point: Point) -> bool:
         """
-        Нахождение второй координаты точки, заданной одной координатой, на отрезке
+        Принадлежит ли указанная точка point отрезку?
+
+        :param point: Указанная точка
+        :return: Признак принадлежности точки. Принадлежит - True, не принадлежит - False
+        """
+
+        cross_product = (point.y - self.start.y) * (self.finish.x - self.start.x) - \
+                        (point.x - self.start.x) * (self.finish.y - self.start.y)
+
+        # compare versus epsilon for floating point values, or != 0 if using integers
+        if abs(cross_product) > ACCURACY:
+            return False
+
+        dot_product = (point.x - self.start.x) * (self.finish.x - self.start.x) + \
+                      (point.y - self.start.y) * (self.finish.y - self.start.y)
+        if dot_product < 0:
+            return False
+
+        squared_length_ba = (self.finish.x - self.start.x) * (self.finish.x - self.start.x) + \
+                          (self.finish.y - self.start.y) * (self.finish.y - self.start.y)
+        if dot_product > squared_length_ba:
+            return False
+
+        return True
+
+    def find_point_with_one_coord(self, value: float, axis: Union[ABSCISSA, ORDINATE]) -> Point:
+        """
+        Нахождение второй координаты точки, заданной одной координатой и лежащей на отрезке
+
         :param value: Значение координаты точки
         :param axis: Ось, на которой задано значение координаты точки. Абсцисса или ордината
         :return: Точка с координатами x и y
@@ -92,14 +122,14 @@ class Segment:
         """
 
         # Если отрезок расположен перпендикулярно абсциссе
-        if math.isclose(self.start.x, self.finish.x, abs_tol=DELTA):
+        if math.isclose(self.start.x, self.finish.x, abs_tol=ACCURACY):
             if self.start.y > self.finish.y:
                 return 270.0
             else:
                 return 90.0
 
         # Если отрезок расположен перпендикулярно ординате
-        if math.isclose(self.start.y, self.finish.y, abs_tol=DELTA):
+        if math.isclose(self.start.y, self.finish.y, abs_tol=ACCURACY):
             if self.start.x > self.finish.x:
                 return 180.0
             else:

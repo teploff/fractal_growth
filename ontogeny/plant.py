@@ -1,47 +1,8 @@
-from anytree import NodeMixin
-from anytree.search import findall, find
 import math
 import numpy
 from typing import List
 
 from geometry.entity_2d import ABSCISSA, ORDINATE, Point, Segment
-
-
-class TreeBranch(Segment, NodeMixin):
-    """
-    TODO: Docstring
-    """
-    def __init__(self, segment: Segment, parent: Segment = None, children: List[Segment] = None):
-        super(Segment, self).__init__()
-        self.segment = segment
-        self.parent = parent
-        if children:
-            self.children = children
-
-    def __len__(self):
-        """
-        Количество узлов у древа
-        :return: Количество узлов (Nodes)
-        """
-
-        return len(findall(self.root))
-
-    def __repr__(self):
-        return f"Line: {self.segment.start}, {self.segment.finish}"
-
-    def get_branch(self, index: int):
-        """
-        Получить узел древа (ветку) с указанным индексом
-        :param index: Индекс узла древа (ветки)
-        :return: Узел древа (ветка)
-        """
-
-        branches = findall(self.root)
-        for i, branch in enumerate(branches):
-            if i == index:
-                return branch
-
-        raise IndexError('Specified index is out of range')
 
 
 def engender_branch(bud: Point, length: float, angle: float) -> Point:
@@ -80,4 +41,4 @@ def engender_random_buds(branch: Segment, count_buds: int) -> List[Point]:
         selected_axis = ORDINATE
         values = numpy.random.uniform(branch.start.y, branch.finish.y, size=(1, count_buds))
 
-    return [branch.find_point(coordinate, selected_axis) for coordinate in values[0]]
+    return [branch.find_point_with_one_coord(coordinate, selected_axis) for coordinate in values[0]]

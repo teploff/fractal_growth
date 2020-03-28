@@ -7,10 +7,14 @@ from OpenGL.GL import *
 from anytree import RenderTree
 # from OpenGL.GLU import *
 from geometry.entity_2d import Point, Segment
-from ontogeny.plant import engender_random_buds, engender_branch, TreeBranch
+from ontogeny.entity_2d import Branch, PlantTree
+from ontogeny.plant import engender_random_buds, engender_branch
+import random
+
+from anytree import PreOrderIter
 
 # import random
-# import time
+import time
 
 SCROLL_UP = 4
 SCROLL_DOWN = 5
@@ -33,53 +37,63 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
         # self.draw(lines)
         quit_mode = False
+        p1 = Point(0, -1)
+        p2 = engender_branch(p1, 0.5, 90)
+        l1 = Segment(p1, p2)
+        print("Angle = ", l1.get_triangle_angle())
+        root = Branch(l1)
+        pt = PlantTree(root)
+        p3, p4 = engender_random_buds(l1, 2)
+        p5 = engender_branch(p3, 0.4, 45)
+        p6 = engender_branch(p4, 0.4, 135)
+        l2 = Segment(p3, p5)
+        print("Angle 2 = ", l2.get_triangle_angle())
+        l3 = Segment(p4, p6)
+        print("Angle 3 = ", l3.get_triangle_angle())
+        node1 = Branch(l2, parent=root)
+        node2 = Branch(l3, parent=root)
+        # p7, p8 = engender_random_buds(Segment(p3, p5), 2)
+        # p9 = engender_branch(p7, 0.3, 67.5)
+        # p10 = engender_branch(p8, 0.2, 22.5)
+        # l4 = Segment(p7, p9)
+        # l5 = Segment(p8, p10)
+        # node3 = TreeBranch(l4, parent=node1)
+        # node4 = TreeBranch(l5, parent=node1)
+        # p11, p12 = engender_random_buds(Segment(p4, p6), 2)
+        # p13 = engender_branch(p11, 0.4, 157.5)
+        # p14 = engender_branch(p12, 0.4, 112.5)
+        # l6 = Segment(p12, p14)
+        # l7 = Segment(p11, p13)
+        # node5 = TreeBranch(l6, parent=node2)
+        # node6 = TreeBranch(l7, parent=node2)
+        # for pre, fill, node in RenderTree(root):
+        #     print("%s%s" % (pre, node))
+        # print("1 = ", node1.get_branch(1))
+        # print("2 = ", node1.get_branch(2))
+        # print("3 = ", node1.get_branch(2))
+
+        # p5 = create_point(p4, 0.1, 180)
+        # p6 = create_point(p5, 0.1, 225)
+        # p7 = create_point(p6, 0.1, 270)
+        # p8 = create_point(p7, 0.1, 315)
+        # p9 = create_point(p8, 0.1, 360)
+        # p10 = create_point(p9, 0.1, 45)
+        z = pt.get_branches_as_segments(root)
         while not quit_mode:
-            p1 = Point(0, -1)
-            p2 = engender_branch(p1, 0.5, 90)
-            l1 = Segment(p1, p2)
-            print("Angle = ", l1.get_triangle_angle())
-            root = TreeBranch(l1)
-            p3, p4 = engender_random_buds(l1, 2)
-            p5 = engender_branch(p3, 0.4, 45)
-            p6 = engender_branch(p4, 0.4, 135)
-            l2 = Segment(p3, p5)
-            print("Angle 2 = ", l2.get_triangle_angle())
-            l3 = Segment(p4, p6)
-            print("Angle 3 = ", l3.get_triangle_angle())
-            node1 = TreeBranch(l2, parent=root)
-            node2 = TreeBranch(l3, parent=root)
-            p7, p8 = engender_random_buds(Segment(p3, p5), 2)
-            p9 = engender_branch(p7, 0.3, 67.5)
-            p10 = engender_branch(p8, 0.2, 22.5)
-            l4 = Segment(p7, p9)
-            l5 = Segment(p8, p10)
-            node3 = TreeBranch(l4, parent=node1)
-            node4 = TreeBranch(l5, parent=node1)
-            p11, p12 = engender_random_buds(Segment(p4, p6), 2)
-            p13 = engender_branch(p11, 0.4, 157.5)
-            p14 = engender_branch(p12, 0.4, 112.5)
-            l6 = Segment(p12, p14)
-            l7 = Segment(p11, p13)
-            node5 = TreeBranch(l6, parent=node2)
-            node6 = TreeBranch(l7, parent=node2)
-            for pre, fill, node in RenderTree(root):
-                print("%s%s" % (pre, node))
-            print("1 = ", node1.get_branch(1))
-            print("2 = ", node1.get_branch(2))
-            print("3 = ", node1.get_branch(2))
-            # p5 = create_point(p4, 0.1, 180)
-            # p6 = create_point(p5, 0.1, 225)
-            # p7 = create_point(p6, 0.1, 270)
-            # p8 = create_point(p7, 0.1, 315)
-            # p9 = create_point(p8, 0.1, 360)
-            # p10 = create_point(p9, 0.1, 45)
-            z = [l1, l2, l3, l4, l5, l6, l7]
-            # Белый цвет фона
-            glClearColor(1, 1, 1, 1)
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            self.draw(z)
-            pygame.display.flip()
-            pygame.time.wait(500)
+            i = random.randint(0, len(pt) - 1)
+            self.draw(z, i)
+            new_branch, delta = self.lol(z[i])
+            nod = pt.get_branch_by_index(i)
+            for ii, node in enumerate(PreOrderIter(nod)):
+                if ii == 0:
+                    continue
+                node.segment.start.x += delta[0]
+                node.segment.start.y += delta[1]
+                node.segment.finish.x += delta[0]
+                node.segment.finish.y += delta[1]
+                v1 = z[i].does_point_belong(node.segment.start)
+            pt.update_branch(z[i], new_branch)
+            z = pt.get_branches_as_segments(root)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -137,15 +151,60 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                         quit_mode = True
 
     @staticmethod
-    def draw(lines: List[Segment]):
+    def draw(lines: List[Segment], index=None):
         # Черный цвет пера для отображения прямых
         glColor3f(0.0, 0.0, 0.0)
         glLineWidth(2)
-        glBegin(GL_LINES)
-        for line in lines:
-            glVertex2f(line.start.x, line.start.y)
-            glVertex2f(line.finish.x, line.finish.y)
-        glEnd()
+        if index is not None:
+            for iter1 in range(6):
+                # Белый цвет фона
+                glClearColor(1, 1, 1, 1)
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+                glBegin(GL_LINES)
+                for line in lines:
+                    glVertex2f(line.start.x, line.start.y)
+                    glVertex2f(line.finish.x, line.finish.y)
+                glEnd()
+                if iter1 % 2 != 0:
+                    glBegin(GL_LINES)
+                    glColor3f(1.0, 0.0, 0.0)
+                    glVertex2f(lines[index].start.x, lines[index].start.y)
+                    glVertex2f(lines[index].finish.x, lines[index].finish.y)
+                    glEnd()
+                    glColor3f(0.0, 0.0, 0.0)
+                pygame.display.flip()
+                pygame.time.wait(300)
+        else:
+            # Белый цвет фона
+            glClearColor(1, 1, 1, 1)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            glBegin(GL_LINES)
+            for line in lines:
+                glVertex2f(line.start.x, line.start.y)
+                glVertex2f(line.finish.x, line.finish.y)
+            glEnd()
+            pygame.display.flip()
+            pygame.time.wait(300)
+
+    @staticmethod
+    def lol(branch: Segment) -> (Segment, tuple):
+        print("Old length = ", branch.len())
+        old_angle = branch.get_triangle_angle()
+        delta_angle = random.randint(-15, 15)
+        angle = old_angle + delta_angle
+
+        old_length = branch.len()
+        delta_legth = 0.1
+        length = old_length + delta_legth
+
+        p = engender_branch(branch.start, length, angle)
+        new_branch = Segment(branch.start, p)
+        print("New length = ", new_branch.len())
+
+        return new_branch, (p.x - branch.finish.x, p.y - branch.finish.y)
+
+    # @staticmethod
+    # def narostit_ostalnie_vetki(root:TreeBranch, ):
 
 
 def main():
