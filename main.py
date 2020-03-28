@@ -8,10 +8,14 @@ from anytree import RenderTree
 # from OpenGL.GLU import *
 from geometry.entity_2d import Point, Segment
 from ontogeny.entity_2d import Branch, PlantTree
-from ontogeny.plant import engender_random_buds, engender_branch
+from ontogeny.utils import engender_random_buds, engender_branch, increase_segment
 import random
 
 from anytree import PreOrderIter
+
+MIN_ANGLE = -10
+MAX_ANGLE = 5
+LENGTH_K = 1.1
 
 # import random
 import time
@@ -42,7 +46,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         l1 = Segment(p1, p2)
         print("Angle = ", l1.get_triangle_angle())
         root = Branch(l1)
-        pt = PlantTree(root)
+        tree = PlantTree(root)
         p3, p4 = engender_random_buds(l1, 2)
         p5 = engender_branch(p3, 0.4, 45)
         p6 = engender_branch(p4, 0.4, 135)
@@ -78,22 +82,25 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         # p8 = create_point(p7, 0.1, 315)
         # p9 = create_point(p8, 0.1, 360)
         # p10 = create_point(p9, 0.1, 45)
-        z = pt.get_branches_as_segments(root)
+        segments = tree.get_branches_as_segments(root)
         while not quit_mode:
-            i = random.randint(0, len(pt) - 1)
-            self.draw(z, i)
-            new_branch, delta = self.lol(z[i])
-            nod = pt.get_branch_by_index(i)
-            for ii, node in enumerate(PreOrderIter(nod)):
+            selected_index_branch = random.randint(0, len(tree) - 1)
+            self.draw(segments, selected_index_branch)
+            delta_angle = random.randint(MIN_ANGLE, MAX_ANGLE)
+            new_branch = increase_segment(segments[selected_index_branch], delta_angle, LENGTH_K)
+            selected_branch = tree.get_branch_by_index(selected_index_branch)
+            for ii, node in enumerate(PreOrderIter(selected_branch)):
                 if ii == 0:
                     continue
-                node.segment.start.x += delta[0]
-                node.segment.start.y += delta[1]
-                node.segment.finish.x += delta[0]
-                node.segment.finish.y += delta[1]
-                v1 = z[i].does_point_belong(node.segment.start)
-            pt.update_branch(z[i], new_branch)
-            z = pt.get_branches_as_segments(root)
+                elif ii == 1 or ii == 2:
+                    s = increase_segment(Segment(selected_branch.segment.start, node.segment.start), delta_angle, LENGTH_K)
+                    delta_x = s.finish.x - node.segment.start.x
+                    delta_y = s.finish.y - node.segment.start.y
+                    node.segment.start = s.finish
+                    node.segment.finish.x += delta_x
+                    node.segment.finish.y += delta_y
+            tree.update_branch(segments[selected_index_branch], new_branch)
+            segments = tree.get_branches_as_segments(root)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -186,22 +193,8 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             pygame.display.flip()
             pygame.time.wait(300)
 
-    @staticmethod
-    def lol(branch: Segment) -> (Segment, tuple):
-        print("Old length = ", branch.len())
-        old_angle = branch.get_triangle_angle()
-        delta_angle = random.randint(-15, 15)
-        angle = old_angle + delta_angle
-
-        old_length = branch.len()
-        delta_legth = 0.1
-        length = old_length + delta_legth
-
-        p = engender_branch(branch.start, length, angle)
-        new_branch = Segment(branch.start, p)
-        print("New length = ", new_branch.len())
-
-        return new_branch, (p.x - branch.finish.x, p.y - branch.finish.y)
+    # @staticmethod
+    # def some_method(branch: Segment) -> Segment:
 
     # @staticmethod
     # def narostit_ostalnie_vetki(root:TreeBranch, ):
