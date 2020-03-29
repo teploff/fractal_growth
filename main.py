@@ -11,9 +11,9 @@ from ontogeny.examles import get_two_level_tree, get_three_level_tree
 import random
 
 
-MIN_ANGLE = -10
-MAX_ANGLE = 5
-LENGTH_K = 1.1
+MIN_ANGLE = -2
+MAX_ANGLE = 2
+LENGTH_K = 1.05
 
 SCROLL_UP = 4
 SCROLL_DOWN = 5
@@ -51,6 +51,11 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 child.segment.start = s.finish
                 child.segment.finish.x += delta_x
                 child.segment.finish.y += delta_y
+                for sub_child in child.children:
+                    sub_child.segment.start.x += delta_x
+                    sub_child.segment.start.y += delta_y
+                    sub_child.segment.finish.x += delta_x
+                    sub_child.segment.finish.y += delta_y
             tree.update_branch(segments[selected_index_branch], new_branch)
             segments = tree.get_branches_as_segments(tree.root)
             for event in pygame.event.get():
