@@ -89,16 +89,14 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             delta_angle = random.randint(MIN_ANGLE, MAX_ANGLE)
             new_branch = increase_segment(segments[selected_index_branch], delta_angle, LENGTH_K)
             selected_branch = tree.get_branch_by_index(selected_index_branch)
-            for ii, node in enumerate(PreOrderIter(selected_branch)):
-                if ii == 0:
-                    continue
-                elif ii == 1 or ii == 2:
-                    s = increase_segment(Segment(selected_branch.segment.start, node.segment.start), delta_angle, LENGTH_K)
-                    delta_x = s.finish.x - node.segment.start.x
-                    delta_y = s.finish.y - node.segment.start.y
-                    node.segment.start = s.finish
-                    node.segment.finish.x += delta_x
-                    node.segment.finish.y += delta_y
+            children = selected_branch.children
+            for child in children:
+                s = increase_segment(Segment(selected_branch.segment.start, child.segment.start), delta_angle, LENGTH_K)
+                delta_x = s.finish.x - child.segment.start.x
+                delta_y = s.finish.y - child.segment.start.y
+                child.segment.start = s.finish
+                child.segment.finish.x += delta_x
+                child.segment.finish.y += delta_y
             tree.update_branch(segments[selected_index_branch], new_branch)
             segments = tree.get_branches_as_segments(root)
             for event in pygame.event.get():
@@ -192,12 +190,6 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             glEnd()
             pygame.display.flip()
             pygame.time.wait(300)
-
-    # @staticmethod
-    # def some_method(branch: Segment) -> Segment:
-
-    # @staticmethod
-    # def narostit_ostalnie_vetki(root:TreeBranch, ):
 
 
 def main():
