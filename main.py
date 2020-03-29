@@ -6,6 +6,7 @@ import design  # Это наш конвертированный файл диз�
 from OpenGL.GL import *
 # from OpenGL.GLU import *
 from geometry.entity_2d import Point, Segment
+from ontogeny.entity_2d import Branch
 from ontogeny.utils import increase_segment
 from ontogeny.examles import get_two_level_tree, get_three_level_tree
 import random
@@ -51,11 +52,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 child.segment.start = s.finish
                 child.segment.finish.x += delta_x
                 child.segment.finish.y += delta_y
-                for sub_child in child.children:
-                    sub_child.segment.start.x += delta_x
-                    sub_child.segment.start.y += delta_y
-                    sub_child.segment.finish.x += delta_x
-                    sub_child.segment.finish.y += delta_y
+                self.recursive_shift_coords(child, delta_x, delta_y)
             tree.update_branch(segments[selected_index_branch], new_branch)
             segments = tree.get_branches_as_segments(tree.root)
             for event in pygame.event.get():
@@ -149,6 +146,16 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             glEnd()
             pygame.display.flip()
             pygame.time.wait(300)
+
+    def recursive_shift_coords(self, parent: Branch, delta_x: float, delta_y: float):
+        for child in parent.children:
+            child.segment.start.x += delta_x
+            child.segment.start.y += delta_y
+            child.segment.finish.x += delta_x
+            child.segment.finish.y += delta_y
+
+            if child.children:
+                self.recursive_shift_coords(child, delta_x, delta_y)
 
 
 def main():
