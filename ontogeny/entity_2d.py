@@ -1,6 +1,6 @@
 from anytree import NodeMixin, PreOrderIter
 from anytree.search import findall, find
-from typing import List
+from typing import List, Tuple
 
 from geometry.entity_2d import Segment
 
@@ -54,7 +54,33 @@ class PlantTree:
 
         raise IndexError('Specified index is out of range')
 
-    def update_branch(self, old_branch, new_branch) -> None:
+    def get_indexes_by_branches(self, branches: List[Branch] or Tuple[Branch]) -> List[int]:
+        """
+
+        :param branches:
+        :return:
+        """
+
+        br = findall(self.root)
+        res = []
+        for i, b in enumerate(br):
+            for bb in branches:
+                if bb == b:
+                    res.append(i)
+
+        return res
+
+    def get_branches_by_height(self, height) -> Tuple[Branch]:
+        """
+        Получить узлы древа (ветки) с указанной высотой древа
+
+        :param height: Высота древа
+        :return: Узлы древа (ветки)
+        """
+
+        return findall(self.root, lambda node: node.height == height)
+
+    def update_branch(self, old_branch: Segment, new_branch: Segment) -> None:
         """
         Змена старой ветки на новоую ветвь.
         :param old_branch: Старая ветвь древа
@@ -69,7 +95,27 @@ class PlantTree:
         branch.segment = new_branch
 
     @staticmethod
-    def get_branches_as_segments(branch: Branch) -> List[Segment]:
+    def represent_branches_as_segments(branches: List[Branch] or Tuple[Branch]) -> List[Segment]:
+        """
+        Представить набор узлов древа (ветвей) в виде списка отрезков
+        :param branches: Набор узлов древа (ветвей)
+        :return: Набор отрезков
+        """
+
+        return [branch.segment for branch in branches]
+
+    @staticmethod
+    def get_children_branches(branch: Branch) -> List[Branch]:
+        """
+
+        :param branch:
+        :return:
+        """
+
+        return [node for node in PreOrderIter(branch)]
+
+    @staticmethod
+    def get_children_branches_as_segments(branch: Branch) -> List[Segment]:
         """
         Получить дочерние узлы древа (ветки) от указанного узла (ветки) branch и представить их в виде массив отрезков
         для дальнейшей отрисовки на экране
