@@ -6,6 +6,35 @@ from geometry.constants import ABSCISSA, ORDINATE
 from geometry.entity_2d import Point, Segment
 
 
+def engender_segment(segment: Segment, length: float) -> None:
+    """
+
+    :param segment:
+    :param length:
+    :return:
+    """
+
+    delta_l = length / 2.0
+    angle = segment.get_triangle_angle()
+
+    if angle == 90:
+        segment.start.y -= delta_l
+        segment.finish.y += delta_l
+    elif angle == 0:
+        segment.start.x -= delta_l
+        segment.finish.x += delta_l
+    elif 0 < angle < 90:
+        segment.start.x -= delta_l * math.cos(angle * math.pi / 180.0)
+        segment.start.y -= delta_l * math.sin(angle * math.pi / 180.0)
+        segment.finish.x += delta_l * math.cos(angle * math.pi / 180.0)
+        segment.finish.y += delta_l * math.sin(angle * math.pi / 180.0)
+    else:
+        segment.start.x += delta_l * math.cos((180.0 - angle) * math.pi / 180.0)
+        segment.start.y -= delta_l * math.sin((180.0 - angle) * math.pi / 180.0)
+        segment.finish.x -= delta_l * math.cos((180.0 - angle) * math.pi / 180.0)
+        segment.finish.y += delta_l * math.sin((180.0 - angle) * math.pi / 180.0)
+
+
 def engender_branch(bud: Point, length: float, angle: float) -> Point:
     """
     Наростить (создать) ветку (отрезок) от текущей почки (точки) на заданную длину.

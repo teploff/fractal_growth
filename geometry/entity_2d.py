@@ -33,8 +33,26 @@ class Segment:
         :param finish: Конечная точка
         """
 
-        self.start = start
-        self.finish = finish
+        self.start, self.finish = self._make_order_points(start, finish)
+
+    @staticmethod
+    def _make_order_points(p1: Point, p2: Point) -> (Point, Point):
+        """
+
+        :param p1:
+        :param p2:
+        :return:
+        """
+
+        if p1.y < p2.y:
+            return p1, p2
+        elif math.isclose(p1.y, p2.y, abs_tol=ACCURACY):
+            if p1.x < p2.x:
+                return p1, p2
+            else:
+                return p2, p1
+        else:
+            return p2, p1
 
     def len(self) -> float:
         """
