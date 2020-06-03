@@ -6,6 +6,39 @@ from geometry.constants import ABSCISSA, ORDINATE
 from geometry.entity_2d import Point, Segment
 
 
+def calculate_equidistant_point(p1: Point, p2: Point, height) -> Point:
+    """
+    Вычсиление точки, являющейся:
+        - равноудаленной от точек p1 и p2
+        - точкой, через которую можно провести перпендикуляр к отрезку (p1, p2) высотой height
+
+    :param p1: Начальная точка
+    :param p2: Конечная точка
+    :param height: Величина перпендикуляра, опущенного на отрезок, представленный  точками p1 и p2
+    :return: Равноудаленная точка
+    """
+
+    x = (p1.x + p2.x) / 2.0 + (height / (math.sqrt((p1.y - p2.y) ** 2 + (p2.x - p1.x) ** 2))) * (p1.y - p2.y)
+    y = (p1.y + p2.y) / 2.0 + (height / (math.sqrt((p1.y - p2.y) ** 2 + (p2.x - p1.x) ** 2))) * (p2.x - p1.x)
+
+    return Point(x, y)
+
+
+def divide_into_two_equal_parts(p1, p2):
+    """
+    Деление отрезка, представленного двумя точками p1 и p2, на две равные части.
+
+    :param p1: Начальная точка, представленная кортежем вида: (x, y)
+    :param p2: Конечная точка, представленная кортежем вида: (x, y)
+    :return: Равные отрезки, представленные в виде кортежа точек (x1, y1), (x2, y2), (x3, y3)
+    """
+
+    x = 1.0 / 2.0 * (p1[0] + p2[0])
+    y = 1.0 / 2.0 * (p1[1] + p2[1])
+
+    return p1, (x, y), p2
+
+
 def engender_segment(segment: Segment, length: float) -> None:
     """
 

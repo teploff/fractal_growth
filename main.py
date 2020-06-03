@@ -5,11 +5,12 @@ from PyQt5 import QtWidgets
 import design  # Это наш конвертированный файл дизайна
 from OpenGL.GL import *
 # from OpenGL.GLU import *
-from geometry.entity_2d import Segment
+from geometry.entity_2d import Segment, Point
 from ontogeny.entity_2d import Branch
-from ontogeny.utils import increase_segment
+from ontogeny.utils import engender_segment, calculate_equidistant_point
 from ontogeny.examles import get_two_level_tree, get_three_level_tree
 import random
+import math
 
 
 MIN_ANGLE = -1
@@ -31,69 +32,42 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         pygame.init()
         # Далее подключаем наши callback-и по нажатию того или иного
-        self.pushButton.clicked.connect(self._engender_tree)
+        self.pushButton.clicked.connect(self._engender_fractal)
 
-    def _engender_tree(self):
+    def _engender_fractal(self):
         # Инициализация белого окна
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
         quit_mode = False
-        tree = get_three_level_tree()
-        segments = tree.get_children_branches_as_segments(tree.root)
+        delta_1 = 0.01
+        delta_2 = math.sqrt(3) * delta_1
+        segment = Segment(Point(-delta_1 / 10.0, -0.75), Point(delta_1 / 10.0, -0.75))
+        segments = [segment]
+        active_segments = [segment]
+        n = 0
         while not quit_mode:
-            selected_height_tree = random.randint(0, tree.root.height)
-            selected_branches = tree.get_branches_by_height(selected_height_tree)
-            selected_indexes = tree.get_indexes_by_branches(selected_branches)
-            selected_segments = tree.represent_branches_as_segments(selected_branches)
-            self.draw(segments, selected_segments)
-
-            for index, branch in enumerate(selected_branches):
-                if selected_indexes[index] == 0:
-                    delta_angle = 0
+            for segment in active_segments:
+                if segment.len() < 0.1:
+                    engender_segment(segment, delta_1)
                 else:
-                    delta_angle = random.randint(MIN_ANGLE, MAX_ANGLE)
-                new_branch = increase_segment(segments[selected_indexes[index]], delta_angle, LENGTH_K)
-                selected_branch = tree.get_branch_by_index(selected_indexes[index])
-                children = selected_branch.children
-                for child in children:
-                    s = increase_segment(Segment(selected_branch.segment.start, child.segment.start), delta_angle, LENGTH_K)
-                    delta_x = s.finish.x - child.segment.start.x
-                    delta_y = s.finish.y - child.segment.start.y
-                    child.segment.start = s.finish
-                    child.segment.finish.x += delta_x
-                    child.segment.finish.y += delta_y
-                    self.recursive_shift_coords(child, delta_x, delta_y)
-                tree.update_branch(segments[selected_indexes[index]], new_branch)
+                    active_segments.remove(segment)
 
-            segments = tree.get_children_branches_as_segments(tree.root)
+                    calculate_equidistant_point(segment.start, segment.finish, delta_2 * n)
+                # else:
+                #     n += 1
+                #     calculate_equidistant_point(segment.start, segment.finish, delta_2*n)
+
+            # selected_height_tree = random.randint(0, tree.root.height)
+            # selected_branches = tree.get_branches_by_height(selected_height_tree)
+            # selected_indexes = tree.get_indexes_by_branches(selected_branches)
+            # selected_segments = tree.represent_branches_as_segments(selected_branches)
+            self.draw(segments)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     quit_mode = True
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == SCROLL_UP:
-                        pass
-                    elif event.button == SCROLL_DOWN:
-                        pass
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RIGHT:
-                        pass
-                    elif event.key == pygame.K_LEFT:
-                        pass
-                    elif event.key == pygame.K_UP:
-                        pass
-                    elif event.key == pygame.K_DOWN:
-                        pass
-                    if event.key == pygame.K_SPACE:
-                        pass
-                    if event.key == pygame.K_d:
-                        pass
-                    elif event.key == pygame.K_a:
-                        pass
-                    elif event.key == pygame.K_w:
-                        pass
-                    elif event.key == pygame.K_s:
-                        pass
-                    elif event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_ESCAPE:
                         pygame.quit()
                         quit_mode = True
 
@@ -102,47 +76,16 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         # Черный цвет пера для отображения прямых
         glColor3f(0.0, 0.0, 0.0)
         glLineWidth(2)
-        if selected_lines is not None:
-            for iter1 in range(6):
-                # Белый цвет фона
-                glClearColor(1, 1, 1, 1)
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-                glBegin(GL_LINES)
-                for line in lines:
-                    glVertex2f(line.start.x, line.start.y)
-                    glVertex2f(line.finish.x, line.finish.y)
-                glEnd()
-                if iter1 % 2 != 0:
-                    for line in selected_lines:
-                        glBegin(GL_LINES)
-                        glColor3f(1.0, 0.0, 0.0)
-                        glVertex2f(line.start.x, line.start.y)
-                        glVertex2f(line.finish.x, line.finish.y)
-                        glEnd()
-                        glColor3f(0.0, 0.0, 0.0)
-                pygame.display.flip()
-                pygame.time.wait(300)
-        else:
-            # Белый цвет фона
-            glClearColor(1, 1, 1, 1)
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            glBegin(GL_LINES)
-            for line in lines:
-                glVertex2f(line.start.x, line.start.y)
-                glVertex2f(line.finish.x, line.finish.y)
-            glEnd()
-            pygame.display.flip()
-            pygame.time.wait(300)
-
-    def recursive_shift_coords(self, parent: Branch, delta_x: float, delta_y: float):
-        for child in parent.children:
-            child.segment.start.x += delta_x
-            child.segment.start.y += delta_y
-            child.segment.finish.x += delta_x
-            child.segment.finish.y += delta_y
-
-            if child.children:
-                self.recursive_shift_coords(child, delta_x, delta_y)
+        # Белый цвет фона
+        glClearColor(1, 1, 1, 1)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glBegin(GL_LINES)
+        for line in lines:
+            glVertex2f(line.start.x, line.start.y)
+            glVertex2f(line.finish.x, line.finish.y)
+        glEnd()
+        pygame.display.flip()
+        pygame.time.wait(100)
 
 
 def main():
