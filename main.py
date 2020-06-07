@@ -11,6 +11,7 @@ from ontogeny.utils import engender_segment, calculate_equidistant_point
 from ontogeny.examles import get_two_level_tree, get_three_level_tree
 import random
 import math
+from fractals.koch_curve import Curve
 
 
 MIN_ANGLE = -1
@@ -23,6 +24,9 @@ HEIGHT = 900
 WIDTH = 1650
 
 display = (WIDTH, HEIGHT)
+
+MAX_LINE_LENGTH = 0.1
+N_ITER = 10
 
 
 class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
@@ -38,29 +42,12 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         # Инициализация белого окна
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
         quit_mode = False
-        delta_1 = 0.01
-        delta_2 = math.sqrt(3) * delta_1
-        segment = Segment(Point(-delta_1 / 10.0, -0.75), Point(delta_1 / 10.0, -0.75))
-        segments = [segment]
-        active_segments = [segment]
-        n = 0
+        koch_curve = Curve(MAX_LINE_LENGTH, N_ITER)
+        koch_curve.build(2)
+
         while not quit_mode:
-            for segment in active_segments:
-                if segment.len() < 0.1:
-                    engender_segment(segment, delta_1)
-                else:
-                    active_segments.remove(segment)
-
-                    calculate_equidistant_point(segment.start, segment.finish, delta_2 * n)
-                # else:
-                #     n += 1
-                #     calculate_equidistant_point(segment.start, segment.finish, delta_2*n)
-
-            # selected_height_tree = random.randint(0, tree.root.height)
-            # selected_branches = tree.get_branches_by_height(selected_height_tree)
-            # selected_indexes = tree.get_indexes_by_branches(selected_branches)
-            # selected_segments = tree.represent_branches_as_segments(selected_branches)
-            self.draw(segments)
+            for lines in koch_curve.lines:
+                self.draw(lines)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

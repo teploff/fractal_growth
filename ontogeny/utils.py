@@ -41,9 +41,9 @@ def divide_into_two_equal_parts(p1, p2):
 
 def engender_segment(segment: Segment, length: float) -> None:
     """
-
-    :param segment:
-    :param length:
+    Увеличить длину отрезка segment на величину length.
+    :param segment: Исходный отрезок
+    :param length: Скаляр на который должна быть увеличина длина отрезка
     :return:
     """
 
@@ -92,7 +92,7 @@ def increase_segment(segment: Segment, delta_angle: float, k_length: float) -> S
     :return: Увеличенный отрезок
     """
 
-    if k_length <= 1:
+    if k_length < 1:
         raise ValueError('Length coefficient must be more than 1 ')
 
     angle = segment.get_triangle_angle() + delta_angle

@@ -133,7 +133,7 @@ class Segment:
         """
         Вычислить угол поворота или меру поворота подвижного радиус-вектора относительно его начального положения.
         Подробнее тут: http://twt.mpei.ac.ru/math/TRIG/TR_010100.html
-        :return: Положительное значение угла поворота
+        :return: Положительное значение угла поворота в градусах
         """
 
         # Если отрезок расположен перпендикулярно абсциссе
@@ -170,3 +170,27 @@ class Segment:
                 angle += 180.0
 
         return angle
+
+    def rotate_at_angle(self, angle: float):
+        """
+
+        :param angle:
+        :return:
+        """
+
+        self.finish.x = math.cos(angle * math.pi / 180.0)
+        self.finish.y = math.sin(angle * math.pi / 180.0)
+
+    def move_by_coord(self, d_x: float, d_y: float):
+        """
+
+        :param d_x:
+        :param d_y:
+        :return:
+        """
+
+        self.start.x += d_x
+        self.start.y += d_y
+
+        self.finish.x += d_x
+        self.finish.y += d_y
