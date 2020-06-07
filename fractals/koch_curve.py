@@ -34,7 +34,8 @@ class Curve:
 
         while segment.len() < self._max_l_l:
             segment = Segment(Point(segment.start.x, segment.start.y), Point(segment.finish.x, segment.finish.y))
-            engender_segment(segment, self._max_l_l / (2.0 * self._max_n_iter))
+            # не a / 2N, a/N ведь наращиваешь лишь прямую
+            engender_segment(segment, self._max_l_l / self._max_n_iter)
             self.lines.append([segment])
 
         self._active_lines.append(segment)
@@ -81,14 +82,16 @@ class Curve:
         self._make_intermediate_states_cache()
 
         for _ in range(n_cycles):
-            for segment in self._active_lines:
-                temp_cache = copy.deepcopy(self._state_cache)
-                angle = segment.get_triangle_angle()
-                delta_x = segment.start.x + self._max_l_l / 2.0
-                delta_y = segment.start.y
-                for temp_segments in temp_cache:
-                    for i, temp_segment in enumerate(temp_segments):
-                        temp_segments[i] = increase_segment(temp_segment, angle, 1.0)
-                        temp_segments[i].move_by_coord(delta_x, delta_y)
-                    self.lines.append(temp_segments)
-                self._active_lines = temp_cache[-1]
+            for state_segments in self._state_cache:
+                temp_lines = []
+                for segment in self._active_lines:
+                    temp_state_segments = copy.deepcopy(state_segments)
+                    angle = segment.get_triangle_angle()
+                    delta_x = segment.start.x + self._max_l_l / 2.0
+                    delta_y = segment.start.y
+                    for i, temp_segment in enumerate(temp_state_segments):
+                        temp_state_segments[i] = increase_segment(temp_segment, angle, 1.0)
+                        temp_state_segments[i].move_by_coord(delta_x, delta_y)
+                    temp_lines += temp_state_segments
+                self.lines.append(temp_lines)
+            self._active_lines = self.lines[-1]
