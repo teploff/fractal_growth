@@ -1,8 +1,10 @@
 import copy
 import math
+from typing import List
 
 from geometry.entity_2d import Segment, Point
 from ontogeny.utils import engender_segment, increase_segment
+from geometry.utils import rotate_by_angle
 
 
 class Curve:
@@ -23,6 +25,9 @@ class Curve:
         self.lines = []
         self._state_cache = []
 
+        self._engender_line()
+        self._make_intermediate_states_cache()
+
     def _engender_line(self):
         """
 
@@ -30,6 +35,9 @@ class Curve:
         """
 
         segment = Segment(Point(-0.001, -0.75), Point(0.001, -0.75))
+        # segment = Segment(Point(-0.75, -0.001), Point(-0.75, 0.001))
+        # segment = Segment(Point(-0.75, 0.001), Point(-0.75, -0.001))
+        # segment = Segment(Point(0.001, -0.75), Point(-0.001, -0.75))
         self.lines.append([segment])
 
         while segment.len() < self._max_l_l:
@@ -71,15 +79,26 @@ class Curve:
             )
             self._state_cache.append([line_1, line_2, line_3, line_4])
 
+    def _make_increment(self, segments: List[Segment], d_x: float, d_y: float):
+        """
+
+        :param d_x:
+        :param d_y:
+        :return:
+        """
+
+        for segment in segments:
+            segment.start.x += d_x
+            segment.start.y += d_y
+            segment.finish.x += d_x
+            segment.finish.y += d_y
+
     def build(self, n_cycles: int):
         """
 
         :param n_cycles:
         :return:
         """
-
-        self._engender_line()
-        self._make_intermediate_states_cache()
 
         for _ in range(n_cycles):
             for state_segments in self._state_cache:
@@ -90,8 +109,14 @@ class Curve:
                     delta_x = segment.start.x + self._max_l_l / 2.0
                     delta_y = segment.start.y
                     for i, temp_segment in enumerate(temp_state_segments):
-                        temp_state_segments[i] = increase_segment(temp_segment, angle, 1.0)
                         temp_state_segments[i].move_by_coord(delta_x, delta_y)
+                        new_point = rotate_by_angle(temp_state_segments[i], angle)
+                        d_x = new_point.x - temp_state_segments[i].finish.x
+                        d_y = new_point.y - temp_state_segments[i].finish.y
+                        if i != 0:
+                            temp_state_segments[i].start = temp_state_segments[i - 1].finish
+                        temp_state_segments[i].finish = new_point
+                        self._make_increment(temp_state_segments[i + 1:], d_x, d_y)
                     temp_lines += temp_state_segments
                 self.lines.append(temp_lines)
             self._active_lines = self.lines[-1]

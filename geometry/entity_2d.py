@@ -33,7 +33,7 @@ class Segment:
         :param finish: Конечная точка
         """
 
-        self.start, self.finish = self._make_order_points(start, finish)
+        self.start, self.finish = start, finish
 
     @staticmethod
     def _make_order_points(p1: Point, p2: Point) -> (Point, Point):

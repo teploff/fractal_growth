@@ -26,7 +26,7 @@ WIDTH = 1650
 display = (WIDTH, HEIGHT)
 
 MAX_LINE_LENGTH = 0.1
-N_ITER = 20
+N_ITER = 10
 
 
 class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
