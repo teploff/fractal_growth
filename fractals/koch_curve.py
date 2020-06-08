@@ -34,7 +34,7 @@ class Curve:
         :return:
         """
 
-        segment = Segment(Point(-0.001, -0.75), Point(0.001, -0.75))
+        segment = Segment(Point(-0.001, -0.35), Point(0.001, -0.35))
         # segment = Segment(Point(-0.75, -0.001), Point(-0.75, 0.001))
         # segment = Segment(Point(-0.75, 0.001), Point(-0.75, -0.001))
         # segment = Segment(Point(0.001, -0.75), Point(-0.001, -0.75))
