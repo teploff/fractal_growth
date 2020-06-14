@@ -25,7 +25,7 @@ WIDTH = 1650
 
 display = (WIDTH, HEIGHT)
 
-MAX_LINE_LENGTH = 0.2
+MAX_LINE_LENGTH = 0.1
 N_ITER = 20
 
 
@@ -43,12 +43,14 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
         quit_mode = False
         koch_curve = Curve(MAX_LINE_LENGTH, N_ITER)
-        koch_curve.build(3)
+        koch_curve.build(2)
 
         while not quit_mode:
-            for lines in koch_curve.lines:
+            for i, lines in enumerate(koch_curve.lines):
                 self.draw(lines)
 
+            for line in lines:
+                print(line.len())
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
