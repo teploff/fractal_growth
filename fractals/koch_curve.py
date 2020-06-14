@@ -24,12 +24,10 @@ class Curve:
 
         self._max_l_l = max_l_l
         self._max_n_iter = max_n_iter
-        self._active_lines = []
+        self._active_segments = []
         self.lines = []
-        self._cache_segments = []
 
         self._engender_segment()
-        self._cache_segments = self._make_construction(self._active_lines[0].start, 0.0)
 
     def _engender_segment(self):
         """
@@ -46,7 +44,7 @@ class Curve:
             engender_segment(segment, self._max_l_l / self._max_n_iter)
             self.lines.append([segment])
 
-        self._active_lines.append(segment)
+        self._active_segments.append(segment)
 
     def _make_construction(self, point: Point, angle: float) -> List[Segment]:
         """
@@ -105,78 +103,53 @@ class Curve:
         x2 = segments[0].start.x + segments[0].len()
         y2 = segments[0].start.y
 
-
     def build(self, n_cycles: int):
         """
 
         :param n_cycles:
         :return:
         """
-        # if n_cycles == 1:
-        #     self.lines = self.lines[:self._max_n_iter + 1]
-        # else:
-        #     for _ in range(n_cycles - 1):
-        #         for cache_segment in self._state_cache:
-        #             for active_segment in self._active_lines:
-        #                 temp_cache_segments = copy.deepcopy(cache_segment)
-        #                 angle = active_segment.get_triangle_angle()
-        # for _ in range(n_cycles):
-        #     for state_segments in self._state_cache:
-        #         temp_lines = []
-        #         for segment in self._active_lines:
-        #             temp_state_segments = copy.deepcopy(state_segments)
-        #             angle = segment.get_triangle_angle()
-        #             delta_x = segment.start.x + self._max_l_l / 2.0
-        #             delta_y = segment.start.y
-        #             for i, temp_segment in enumerate(temp_state_segments):
-        #                 temp_state_segments[i].move_by_coord(delta_x, delta_y)
-        #                 new_point = rotate_by_angle(temp_state_segments[i], angle)
-        #                 d_x = new_point.x - temp_state_segments[i].finish.x
-        #                 d_y = new_point.y - temp_state_segments[i].finish.y
-        #                 if i != 0:
-        #                     temp_state_segments[i].start = temp_state_segments[i - 1].finish
-        #                 temp_state_segments[i].finish = new_point
-        #                 self._make_increment(temp_state_segments[i + 1:], d_x, d_y)
-        #             temp_lines += temp_state_segments
-        #         self.lines.append(temp_lines)
-        #     self._active_lines = self.lines[-1]
-        #
-        # for lines in self.lines[1:]:
-        #     dx = CENTER.x - lines[len(lines)//2 - 1].finish.x
-        #     dy = CENTER.y - lines[len(lines)//2 - 1].finish.y
-        #     lines[len(lines)//2 - 1].start.x += dx
-        #     lines[len(lines)//2 - 1].start.y += dy
-        #     lines[len(lines)//2 - 1].finish.x += dx
-        #     lines[len(lines)//2 - 1].finish.y += dy
-        #     reference_point = lines[len(lines)//2 - 1].start
-        #     left_side = lines[:len(lines) // 2 - 1]
-        #     for line in left_side[::-1]:
-        #         dx = reference_point.x - line.finish.x
-        #         dy = reference_point.y - line.finish.y
-        #         line.start.x += dx
-        #         line.start.y += dy
-        #         line.finish.x += dx
-        #         line.finish.y += dy
-        #         reference_point = line.start
-        #
-        #     dx = CENTER.x - lines[len(lines) // 2].start.x
-        #     dy = CENTER.y - lines[len(lines) // 2].start.y
-        #     lines[len(lines) // 2].start.x += dx
-        #     lines[len(lines) // 2].start.y += dy
-        #     lines[len(lines) // 2].finish.x += dx
-        #     lines[len(lines) // 2].finish.y += dy
-        #     reference_point = lines[len(lines) // 2].finish
-        #     right_side = lines[len(lines) // 2 + 1:]
-        #     for line in right_side:
-        #         dx = reference_point.x - line.start.x
-        #         dy = reference_point.y - line.start.y
-        #         line.start.x += dx
-        #         line.start.y += dy
-        #         line.finish.x += dx
-        #         line.finish.y += dy
-        #         reference_point = line.finish
+        for _ in range(n_cycles - 1):
+            union_segments = []
+            for active_segment in self._active_segments:
+                union_segments.append(self._make_construction(active_segment.start, active_segment.get_triangle_angle()))
 
-        self.lines = self.lines[:21]
-        for lines in self._cache_segments:
-            self.lines.append(lines)
-        # self.lines[1] = self._state_cache
+            for depth in range(len(union_segments[0])):
+                depth_segments = [segment[depth] for segment in union_segments]
+
+                for segments in depth_segments:
+                    dx = CENTER.x - segments[len(segments)//2 - 1].finish.x
+                    dy = CENTER.y - segments[len(segments)//2 - 1].finish.y
+                    segments[len(segments)//2 - 1].start.x += dx
+                    segments[len(segments)//2 - 1].start.y += dy
+                    segments[len(segments)//2 - 1].finish.x += dx
+                    segments[len(segments)//2 - 1].finish.y += dy
+                    reference_point = segments[len(segments)//2 - 1].start
+                    left_side = segments[:len(segments) // 2 - 1]
+                    for line in left_side[::-1]:
+                        dx = reference_point.x - line.finish.x
+                        dy = reference_point.y - line.finish.y
+                        line.start.x += dx
+                        line.start.y += dy
+                        line.finish.x += dx
+                        line.finish.y += dy
+                        reference_point = line.start
+
+                    dx = CENTER.x - segments[len(segments) // 2].start.x
+                    dy = CENTER.y - segments[len(segments) // 2].start.y
+                    segments[len(segments) // 2].start.x += dx
+                    segments[len(segments) // 2].start.y += dy
+                    segments[len(segments) // 2].finish.x += dx
+                    segments[len(segments) // 2].finish.y += dy
+                    reference_point = segments[len(segments) // 2].finish
+                    right_side = segments[len(segments) // 2 + 1:]
+                    for line in right_side:
+                        dx = reference_point.x - line.start.x
+                        dy = reference_point.y - line.start.y
+                        line.start.x += dx
+                        line.start.y += dy
+                        line.finish.x += dx
+                        line.finish.y += dy
+                        reference_point = line.finish
+
+                    self.lines += depth_segments
