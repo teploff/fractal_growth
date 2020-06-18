@@ -1,10 +1,8 @@
-import copy
 import math
 from typing import List
 
 from geometry.entity_2d import Segment, Point
-from ontogeny.utils import engender_segment, increase_segment
-from geometry.utils import rotate_by_angle
+from ontogeny.utils import engender_segment
 
 CENTER = Point(0.0, 0.0)
 BETA = 45.0
@@ -80,29 +78,6 @@ class Curve:
         
         return segments
 
-    def _make_increment(self, segments: List[Segment], d_x: float, d_y: float):
-        """
-
-        :param d_x:
-        :param d_y:
-        :return:
-        """
-
-        for segment in segments:
-            segment.start.x += d_x
-            segment.start.y += d_y
-            segment.finish.x += d_x
-            segment.finish.y += d_y
-
-    def _rotate_construction(self, segments: List[Segment], angle: float):
-        """
-
-        :return:
-        """
-
-        x2 = segments[0].start.x + segments[0].len()
-        y2 = segments[0].start.y
-
     def build(self, n_cycles: int):
         """
 
@@ -112,12 +87,12 @@ class Curve:
         for _ in range(n_cycles - 1):
             union_segments = []
             for active_segment in self._active_segments:
-                union_segments.append(self._make_construction(active_segment.start, active_segment.get_triangle_angle()))
+                angle = active_segment.get_triangle_angle()
+                union_segments.append(self._make_construction(active_segment.start, angle))
 
             for depth in range(len(union_segments[0])):
                 depth_segments = [segment for segments in union_segments for segment in segments[depth]]
 
-                # for segment in depth_segments:
                 dx = CENTER.x - depth_segments[len(depth_segments)//2 - 1].finish.x
                 dy = CENTER.y - depth_segments[len(depth_segments)//2 - 1].finish.y
                 depth_segments[len(depth_segments)//2 - 1].start.x += dx

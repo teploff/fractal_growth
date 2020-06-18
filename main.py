@@ -6,11 +6,6 @@ import design  # Это наш конвертированный файл диз�
 from OpenGL.GL import *
 # from OpenGL.GLU import *
 from geometry.entity_2d import Segment, Point
-from ontogeny.entity_2d import Branch
-from ontogeny.utils import engender_segment, calculate_equidistant_point
-from ontogeny.examles import get_two_level_tree, get_three_level_tree
-import random
-import math
 from fractals.koch_curve import Curve
 
 
@@ -43,7 +38,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
         quit_mode = False
         koch_curve = Curve(MAX_LINE_LENGTH, N_ITER)
-        koch_curve.build(5)
+        koch_curve.build(8)
 
         while not quit_mode:
             for i, lines in enumerate(koch_curve.lines):
