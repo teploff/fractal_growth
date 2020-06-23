@@ -37,8 +37,8 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         # Инициализация белого окна
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
         quit_mode = False
-        koch_curve = Curve(MAX_LINE_LENGTH, N_ITER)
-        koch_curve.build(5)
+        koch_curve = Curve(float(self.lineEdit.text()), N_ITER)
+        koch_curve.build(self.spinBox.value())
 
         while not quit_mode:
             for i, lines in enumerate(koch_curve.lines):
