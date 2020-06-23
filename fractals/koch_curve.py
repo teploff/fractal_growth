@@ -44,18 +44,26 @@ class Curve:
 
         self._active_segments.append(segment)
 
-    def _make_construction(self, point: Point, angle: float) -> List[Segment]:
+    @staticmethod
+    def _make_construction(max_iter: int, max_length: float, start_length: float, point: Point, angle: float) -> \
+            List[List[Segment]]:
         """
-
-        :return:
+        Формирование списков промежуточных фаз роста фрактальной структуры.
+        :param max_iter: Количество итераций роста фрактальной структуры.
+        :param max_length: Предельное значение длины отрезка.
+        :param start_length: Начальное знаение отрезка.
+        :param point: Точка на основе которой просиходит рост.
+        :param angle: Угол наклона фрактальной структуры.
+        :return: Список промежуточных фаз фрактальной структуры.
         """
         
         segments = []
-        
-        length = self._max_l_l / 2.0
-        for iteration in range(self._max_n_iter):
-            height = ((iteration + 1) / self._max_n_iter) * self._max_l_l * math.sin(BETA * math.pi / 180.0)
-            length += (self._max_l_l / 2.0) / self._max_n_iter
+        length = start_length
+        delta_length = (max_length - start_length) / max_iter
+
+        for iteration in range(max_iter):
+            height = ((iteration + 1) / max_iter) * max_length * math.sin(BETA * math.pi / 180.0)
+            length += delta_length
 
             x_2 = point.x + length * math.cos(angle * math.pi / 180.0)
             y_2 = point.y + length * math.sin(angle * math.pi / 180.0)
@@ -88,7 +96,8 @@ class Curve:
             union_segments = []
             for active_segment in self._active_segments:
                 angle = active_segment.get_triangle_angle()
-                union_segments.append(self._make_construction(active_segment.start, angle))
+                union_segments.append(self._make_construction(
+                    self._max_n_iter, self._max_l_l, self._max_l_l / 2.0, active_segment.start, angle))
 
             for depth in range(len(union_segments[0])):
                 depth_segments = [segment for segments in union_segments for segment in segments[depth]]
