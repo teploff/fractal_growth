@@ -44,6 +44,60 @@ class Curve:
 
         self._active_segments.append(segment)
 
+    def _engender_primitive(self):
+        """
+
+        :return:
+        """
+
+        union_segments = []
+
+        angle = self._active_segments[0].get_triangle_angle()
+        union_segments.append(self._make_construction(
+            self._max_n_iter, self._max_l_l, self._max_l_l / 2.0, self._active_segments[0].start, angle))
+
+        for depth in range(len(union_segments[0])):
+            depth_segments = [segment for segments in union_segments for segment in segments[depth]]
+
+            dx = CENTER.x - depth_segments[len(depth_segments) // 2 - 1].finish.x
+            dy = CENTER.y - depth_segments[len(depth_segments) // 2 - 1].finish.y
+            depth_segments[len(depth_segments) // 2 - 1].start.x += dx
+            depth_segments[len(depth_segments) // 2 - 1].start.y += dy
+            depth_segments[len(depth_segments) // 2 - 1].finish.x += dx
+            depth_segments[len(depth_segments) // 2 - 1].finish.y += dy
+            reference_point = depth_segments[len(depth_segments) // 2 - 1].start
+            left_side = depth_segments[:len(depth_segments) // 2 - 1]
+            for line in left_side[::-1]:
+                dx = reference_point.x - line.finish.x
+                dy = reference_point.y - line.finish.y
+                line.start.x += dx
+                line.start.y += dy
+                line.finish.x += dx
+                line.finish.y += dy
+                reference_point = line.start
+
+            dx = CENTER.x - depth_segments[len(depth_segments) // 2].start.x
+            dy = CENTER.y - depth_segments[len(depth_segments) // 2].start.y
+            depth_segments[len(depth_segments) // 2].start.x += dx
+            depth_segments[len(depth_segments) // 2].start.y += dy
+            depth_segments[len(depth_segments) // 2].finish.x += dx
+            depth_segments[len(depth_segments) // 2].finish.y += dy
+            reference_point = depth_segments[len(depth_segments) // 2].finish
+            right_side = depth_segments[len(depth_segments) // 2 + 1:]
+            for line in right_side:
+                dx = reference_point.x - line.start.x
+                dy = reference_point.y - line.start.y
+                line.start.x += dx
+                line.start.y += dy
+                line.finish.x += dx
+                line.finish.y += dy
+                reference_point = line.finish
+
+            self.lines += [depth_segments]
+
+        self._active_segments = self.lines[-1]
+
+
     @staticmethod
     def _make_construction(max_iter: int, max_length: float, start_length: float, point: Point, angle: float) -> \
             List[List[Segment]]:
@@ -92,50 +146,66 @@ class Curve:
         :param n_cycles:
         :return:
         """
-        for _ in range(n_cycles - 1):
-            union_segments = []
-            for active_segment in self._active_segments:
-                angle = active_segment.get_triangle_angle()
-                union_segments.append(self._make_construction(
-                    self._max_n_iter, self._max_l_l, self._max_l_l / 2.0, active_segment.start, angle))
 
-            for depth in range(len(union_segments[0])):
-                depth_segments = [segment for segments in union_segments for segment in segments[depth]]
+        if n_cycles == 1:
+            return
+        elif n_cycles == 2:
+            self._engender_primitive()
+        else:
+            self._engender_primitive()
+            growths = [20, 120]
+            for _ in range(n_cycles - 2):
+                union_segments = [None for _ in range(len(self._active_segments))]
+                left_active_segment = self._active_segments[:len(self._active_segments) // 2]
+                right_active_segment = self._active_segments[len(self._active_segments) // 2:]
 
-                dx = CENTER.x - depth_segments[len(depth_segments)//2 - 1].finish.x
-                dy = CENTER.y - depth_segments[len(depth_segments)//2 - 1].finish.y
-                depth_segments[len(depth_segments)//2 - 1].start.x += dx
-                depth_segments[len(depth_segments)//2 - 1].start.y += dy
-                depth_segments[len(depth_segments)//2 - 1].finish.x += dx
-                depth_segments[len(depth_segments)//2 - 1].finish.y += dy
-                reference_point = depth_segments[len(depth_segments)//2 - 1].start
-                left_side = depth_segments[:len(depth_segments) // 2 - 1]
-                for line in left_side[::-1]:
-                    dx = reference_point.x - line.finish.x
-                    dy = reference_point.y - line.finish.y
-                    line.start.x += dx
-                    line.start.y += dy
-                    line.finish.x += dx
-                    line.finish.y += dy
-                    reference_point = line.start
+                for index in range(len(self._active_segments) // 2):
+                    angle = left_active_segment[len(left_active_segment) - 1 - index].get_triangle_angle()
+                    union_segments[len(left_active_segment) - 1 - index] = self._make_construction(
+                        growths[index % len(growths)], self._max_l_l, self._max_l_l / 2.0,
+                        left_active_segment[len(left_active_segment) - 1 - index].start, angle)
+                    angle = right_active_segment[index].get_triangle_angle()
+                    union_segments[len(self._active_segments) // 2 + index] = self._make_construction(
+                        growths[index % len(growths)], self._max_l_l, self._max_l_l / 2.0,
+                        right_active_segment[index].start, angle)
 
-                dx = CENTER.x - depth_segments[len(depth_segments) // 2].start.x
-                dy = CENTER.y - depth_segments[len(depth_segments) // 2].start.y
-                depth_segments[len(depth_segments) // 2].start.x += dx
-                depth_segments[len(depth_segments) // 2].start.y += dy
-                depth_segments[len(depth_segments) // 2].finish.x += dx
-                depth_segments[len(depth_segments) // 2].finish.y += dy
-                reference_point = depth_segments[len(depth_segments) // 2].finish
-                right_side = depth_segments[len(depth_segments) // 2 + 1:]
-                for line in right_side:
-                    dx = reference_point.x - line.start.x
-                    dy = reference_point.y - line.start.y
-                    line.start.x += dx
-                    line.start.y += dy
-                    line.finish.x += dx
-                    line.finish.y += dy
-                    reference_point = line.finish
+                for depth in range(min(len(union_segment) for union_segment in union_segments)):
+                    depth_segments = [segment for segments in union_segments for segment in segments[depth]]
 
-                self.lines += [depth_segments]
+                    dx = CENTER.x - depth_segments[len(depth_segments)//2 - 1].finish.x
+                    dy = CENTER.y - depth_segments[len(depth_segments)//2 - 1].finish.y
+                    depth_segments[len(depth_segments)//2 - 1].start.x += dx
+                    depth_segments[len(depth_segments)//2 - 1].start.y += dy
+                    depth_segments[len(depth_segments)//2 - 1].finish.x += dx
+                    depth_segments[len(depth_segments)//2 - 1].finish.y += dy
+                    reference_point = depth_segments[len(depth_segments)//2 - 1].start
+                    left_side = depth_segments[:len(depth_segments) // 2 - 1]
+                    for line in left_side[::-1]:
+                        dx = reference_point.x - line.finish.x
+                        dy = reference_point.y - line.finish.y
+                        line.start.x += dx
+                        line.start.y += dy
+                        line.finish.x += dx
+                        line.finish.y += dy
+                        reference_point = line.start
 
-            self._active_segments = self.lines[-1]
+                    dx = CENTER.x - depth_segments[len(depth_segments) // 2].start.x
+                    dy = CENTER.y - depth_segments[len(depth_segments) // 2].start.y
+                    depth_segments[len(depth_segments) // 2].start.x += dx
+                    depth_segments[len(depth_segments) // 2].start.y += dy
+                    depth_segments[len(depth_segments) // 2].finish.x += dx
+                    depth_segments[len(depth_segments) // 2].finish.y += dy
+                    reference_point = depth_segments[len(depth_segments) // 2].finish
+                    right_side = depth_segments[len(depth_segments) // 2 + 1:]
+                    for line in right_side:
+                        dx = reference_point.x - line.start.x
+                        dy = reference_point.y - line.start.y
+                        line.start.x += dx
+                        line.start.y += dy
+                        line.finish.x += dx
+                        line.finish.y += dy
+                        reference_point = line.finish
+
+                    self.lines += [depth_segments]
+
+                self._active_segments = self.lines[-1]
