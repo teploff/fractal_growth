@@ -75,8 +75,6 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                     lll.append(Segment(koch_curve.lines[j][0].start, koch_curve.lines[j + 1][0].start))
                     lll.append(Segment(koch_curve.lines[j][len(koch_curve.lines[j]) - 1].finish,
                                        koch_curve.lines[j + 1][len(koch_curve.lines[j + 1]) - 1].finish))
-                    if koch_curve.lines[j + 1][len(koch_curve.lines[j]) - 1].finish.x - koch_curve.lines[j][len(koch_curve.lines[j]) - 1].finish.x < 0:
-                        pass
                 new_lines.append(lll)
                 i += 1
 
@@ -105,6 +103,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             glVertex2f(line.start.x, line.start.y)
             glVertex2f(line.finish.x, line.finish.y)
         glEnd()
+        pygame.image.save(pygame.display.get_surface(), "circle.png")
         pygame.display.flip()
         pygame.time.wait(100)
 
