@@ -97,7 +97,6 @@ class Curve:
 
         self._active_segments = self.lines[-1]
 
-
     @staticmethod
     def _make_construction(max_iter: int, max_length: float, start_length: float, point: Point, angle: float) -> \
             List[List[Segment]]:

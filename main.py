@@ -7,6 +7,7 @@ from OpenGL.GL import *
 # from OpenGL.GLU import *
 from geometry.entity_2d import Segment, Point
 from fractals.koch_curve import Curve
+from PIL import Image, ImageOps
 
 
 MIN_ANGLE = -1
@@ -43,7 +44,9 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
         while not quit_mode:
             for i, lines in enumerate(koch_curve.lines):
-                self.draw(lines)
+                self.draw(i, lines)
+            pygame.quit()
+            quit_mode = True
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -91,7 +94,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                         quit_mode = True
 
     @staticmethod
-    def draw(lines: List[Segment], selected_lines=None):
+    def draw(i, lines: List[Segment], selected_lines=None):
         # Черный цвет пера для отображения прямых
         glColor3f(0.0, 0.0, 0.0)
         glLineWidth(2)
@@ -103,9 +106,13 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             glVertex2f(line.start.x, line.start.y)
             glVertex2f(line.finish.x, line.finish.y)
         glEnd()
-        pygame.image.save(pygame.display.get_surface(), "circle.png")
         pygame.display.flip()
         pygame.time.wait(100)
+        glPixelStorei(GL_PACK_ALIGNMENT, 1)
+        data = glReadPixels(0, 0, WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE)
+        image = Image.frombytes("RGBA", (WIDTH, HEIGHT), data)
+        image = ImageOps.flip(image)  # in my case image is flipped top-bottom for some reason
+        image.save('./picrutres/' + str(i) + '.png', 'PNG')
 
 
 def main():
