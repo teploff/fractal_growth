@@ -35,6 +35,9 @@ class Segment:
 
         self.start, self.finish = start, finish
 
+    def __repr__(self):
+        return f'Start({self.start}), Finish{self.finish})'
+
     @staticmethod
     def _make_order_points(p1: Point, p2: Point) -> (Point, Point):
         """

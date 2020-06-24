@@ -32,6 +32,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         pygame.init()
         # Далее подключаем наши callback-и по нажатию того или иного
         self.pushButton.clicked.connect(self._engender_fractal)
+        self.pushButton_2.clicked.connect(self._point_growth_path)
 
     def _engender_fractal(self):
         # Инициализация белого окна
@@ -44,8 +45,44 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             for i, lines in enumerate(koch_curve.lines):
                 self.draw(lines)
 
-            for line in lines:
-                print(line.len())
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit_mode = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        quit_mode = True
+
+    def _point_growth_path(self):
+        """
+
+        :return:
+        """
+
+        # Инициализация белого окна
+        pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
+        quit_mode = False
+        koch_curve = Curve(float(self.lineEdit.text()), N_ITER)
+        koch_curve.build(self.spinBox.value())
+
+        while not quit_mode:
+            new_lines = []
+            i = 0
+            while i < len(koch_curve.lines) - 2:
+                lll = []
+                for j in range(i + 1):
+                    lll.append(Segment(koch_curve.lines[j][0].start, koch_curve.lines[j + 1][0].start))
+                    lll.append(Segment(koch_curve.lines[j][len(koch_curve.lines[j]) - 1].finish,
+                                       koch_curve.lines[j + 1][len(koch_curve.lines[j + 1]) - 1].finish))
+                    if koch_curve.lines[j + 1][len(koch_curve.lines[j]) - 1].finish.x - koch_curve.lines[j][len(koch_curve.lines[j]) - 1].finish.x < 0:
+                        pass
+                new_lines.append(lll)
+                i += 1
+
+            for i, lines in enumerate(new_lines):
+                self.draw(lines)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
