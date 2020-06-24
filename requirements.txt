@@ -1,5 +1,6 @@
 anytree==2.8.0
 numpy==1.18.2
+Pillow==7.1.2
 pygame==1.9.6
 PyOpenGL==3.1.5
 PyQt5==5.14.2
