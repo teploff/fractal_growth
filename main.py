@@ -56,8 +56,10 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         index = 0
         quit_mode = False
         while not quit_mode:
-            self.draw(koch_curve.lines[index % len(koch_curve.lines)], self.rgb_lines, self.rgb_background)
-            self.save_image(DIRECTORY, str(index) + '.png')
+            self.draw(koch_curve.lines[index % len(koch_curve.lines)], self.rgb_lines, self.rgb_background,
+                      self.sb_draw_latency.value())
+            # TODO: make save image
+            # self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -127,13 +129,14 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.pb_background_color.setStyleSheet(f"QWidget {{ background-color: {color.name()} }}")
 
     @staticmethod
-    def draw(lines: List[Segment], rgb_lines: Tuple[float, float, float], rgb_background: Tuple[float, float, float]) \
-            -> None:
+    def draw(lines: List[Segment], rgb_lines: Tuple[float, float, float], rgb_background: Tuple[float, float, float],
+             draw_latency: int) -> None:
         """
         Прорисовка на канвасе OpenGL.
         :param lines: Список отрезков, которые необходимо отобразить.
         :param rgb_lines: RGB пера, которым будут отрисованы отрезки.
         :param rgb_background: RGB фона.
+        :param draw_latency: задержка при отрисовке.
         :return:
         """
         glColor3f(*rgb_lines)
@@ -148,7 +151,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         glEnd()
 
         pygame.display.flip()
-        pygame.time.wait(100)
+        pygame.time.wait(draw_latency)
 
     @staticmethod
     def save_image(directory: str, file_name: str) -> None:
