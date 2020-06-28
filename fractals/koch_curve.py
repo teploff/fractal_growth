@@ -152,7 +152,7 @@ class Curve:
             self._engender_primitive()
         else:
             self._engender_primitive()
-            growths = [40, 120]
+            growths = [20, 80]
             for _ in range(n_cycles - 2):
                 union_segments = [None for _ in range(len(self._active_segments))]
                 left_active_segment = self._active_segments[:len(self._active_segments) // 2]

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import pygame
 import sys  # sys нужен для передачи argv в QApplication
 from PyQt5 import QtWidgets
@@ -10,43 +10,54 @@ from fractals.koch_curve import Curve
 from PIL import Image, ImageOps
 
 
-MIN_ANGLE = -1
-MAX_ANGLE = 1
-LENGTH_K = 1.05
-
 SCROLL_UP = 4
 SCROLL_DOWN = 5
-HEIGHT = 900
-WIDTH = 1650
+HEIGHT = 1000
+WIDTH = 1000
 
 display = (WIDTH, HEIGHT)
 
 MAX_LINE_LENGTH = 0.05
 N_ITER = 20
+BLACK = (0.0, 0.0, 0.0)
+WHITE = (1.0, 1.0, 1.0)
+
+DIRECTORY = './pictures/'
 
 
 class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
     def __init__(self):
-        # Это здесь нужно для доступа к переменным, методам и т.д. в файле design.py
+        # initialize components from generated design.py
         super().__init__()
-        self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+        self.setupUi(self)
+
+        # default colors value for lines and background
+        self.rgb_lines = BLACK
+        self.rgb_background = WHITE
+
         pygame.init()
-        # Далее подключаем наши callback-и по нажатию того или иного
-        self.pushButton.clicked.connect(self._engender_fractal)
-        self.pushButton_2.clicked.connect(self._point_growth_path)
+
+        # callbacks
+        self.pb_engender_fractal.clicked.connect(self._engender_fractal)
+        self.pb_build_point_path.clicked.connect(self._point_growth_path)
+        self.pb_line_color.clicked.connect(self._pick_lines_color)
+        self.pb_background_color.clicked.connect(self._pick_background_color)
 
     def _engender_fractal(self):
-        # Инициализация белого окна
+        """
+        Наростить фрактал.
+        :return:
+        """
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
-        quit_mode = False
-        koch_curve = Curve(float(self.lineEdit.text()), N_ITER)
-        koch_curve.build(self.spinBox.value())
 
+        koch_curve = Curve(self.dsb_max_line_legth.value(), N_ITER)
+        koch_curve.build(self.sb_fractal_depth.value())
+
+        index = 0
+        quit_mode = False
         while not quit_mode:
-            for i, lines in enumerate(koch_curve.lines):
-                self.draw(i, lines)
-            pygame.quit()
-            quit_mode = True
+            self.draw(koch_curve.lines[index % len(koch_curve.lines)], self.rgb_lines, self.rgb_background)
+            self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -57,17 +68,18 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                         pygame.quit()
                         quit_mode = True
 
+            index += 1
+
     def _point_growth_path(self):
         """
-
+        Построить траекторию роста точек фрактала
         :return:
         """
-
         # Инициализация белого окна
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
         quit_mode = False
-        koch_curve = Curve(float(self.lineEdit.text()), N_ITER)
-        koch_curve.build(self.spinBox.value())
+        koch_curve = Curve(self.dsb_max_line_legth.value(), N_ITER)
+        koch_curve.build(self.sb_fractal_depth.value())
 
         while not quit_mode:
             new_lines = []
@@ -82,7 +94,8 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 i += 1
 
             for i, lines in enumerate(new_lines):
-                self.draw(lines)
+                self.draw(lines, BLACK, WHITE)
+                self.save_image(DIRECTORY, str(i) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -93,33 +106,73 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                         pygame.quit()
                         quit_mode = True
 
+    def _pick_lines_color(self) -> None:
+        """
+        Выбор паитры для отрисовки отрезков.
+        :return:
+        """
+        color = QtWidgets.QColorDialog.getColor()
+
+        self.rgb_lines = (color.redF(), color.greenF(), color.blueF())
+        self.pb_line_color.setStyleSheet(f"QWidget {{ background-color: {color.name()} }}")
+
+    def _pick_background_color(self) -> None:
+        """
+        Выбор палитры для заливки фона.
+        :return:
+        """
+        color = QtWidgets.QColorDialog.getColor()
+
+        self.rgb_background = (color.redF(), color.greenF(), color.blueF())
+        self.pb_background_color.setStyleSheet(f"QWidget {{ background-color: {color.name()} }}")
+
     @staticmethod
-    def draw(i, lines: List[Segment], selected_lines=None):
-        # Черный цвет пера для отображения прямых
-        glColor3f(0.0, 0.0, 0.0)
+    def draw(lines: List[Segment], rgb_lines: Tuple[float, float, float], rgb_background: Tuple[float, float, float]) \
+            -> None:
+        """
+        Прорисовка на канвасе OpenGL.
+        :param lines: Список отрезков, которые необходимо отобразить.
+        :param rgb_lines: RGB пера, которым будут отрисованы отрезки.
+        :param rgb_background: RGB фона.
+        :return:
+        """
+        glColor3f(*rgb_lines)
         glLineWidth(2)
-        # Белый цвет фона
-        glClearColor(1, 1, 1, 1)
+        glClearColor(*rgb_background, 1)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
         glBegin(GL_LINES)
         for line in lines:
             glVertex2f(line.start.x, line.start.y)
             glVertex2f(line.finish.x, line.finish.y)
         glEnd()
+
         pygame.display.flip()
         pygame.time.wait(100)
+
+    @staticmethod
+    def save_image(directory: str, file_name: str) -> None:
+        """
+        Сохранение текущего состояния канваса OpenGL в виде PNG файла на диск.
+        :param directory: Полный или относительный путь дирректории, куда будет производиться сохранение.
+        :param file_name: Наименование файла.
+        :return:
+        """
         glPixelStorei(GL_PACK_ALIGNMENT, 1)
+
         data = glReadPixels(0, 0, WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE)
         image = Image.frombytes("RGBA", (WIDTH, HEIGHT), data)
         image = ImageOps.flip(image)  # in my case image is flipped top-bottom for some reason
-        image.save('./picrutres/' + str(i) + '.png', 'PNG')
+        image.save(directory + file_name, 'PNG')
 
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
-    window = Application()                  # Создаём объект класса Application
-    window.show()                           # Показываем окно
-    app.exec_()                             # и запускаем приложение
+    app = QtWidgets.QApplication(sys.argv)
+
+    window = Application()
+    window.show()
+
+    app.exec_()
 
 
 if __name__ == '__main__':
