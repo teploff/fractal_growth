@@ -158,18 +158,17 @@ class Curve:
         curr_len = len(self.lines)
         while (len(self.lines) - curr_len) != max(growths) * (n_cycles - 2):
             union_segments = [List[List] for _ in range(len(self._active_segments))]
-            left_active_segment = self._active_segments[:len(self._active_segments) // 2]
-            right_active_segment = self._active_segments[len(self._active_segments) // 2:]
 
             for index in range(len(self._active_segments) // 2):
-                angle = left_active_segment[len(left_active_segment) - 1 - index].get_triangle_angle()
-                union_segments[len(left_active_segment) - 1 - index] = self._make_construction(
+                angle = self._active_segments[index].get_triangle_angle()
+                union_segments[index] = self._make_construction(
                     growths[index % len(growths)], self._max_l_l, self._max_l_l / 2.0,
-                    left_active_segment[len(left_active_segment) - 1 - index].start, angle)
-                angle = right_active_segment[index].get_triangle_angle()
-                union_segments[len(self._active_segments) // 2 + index] = self._make_construction(
+                    self._active_segments[index].start, angle)
+
+                angle = self._active_segments[len(self._active_segments) - 1 - index].get_triangle_angle()
+                union_segments[len(self._active_segments) - 1 - index] = self._make_construction(
                     growths[index % len(growths)], self._max_l_l, self._max_l_l / 2.0,
-                    right_active_segment[index].start, angle)
+                    self._active_segments[len(self._active_segments) - 1 - index].start, angle)
 
             for depth in range(min(len(union_segment) for union_segment in union_segments)):
                 depth_segments = [segment for segments in union_segments for segment in segments[depth]]
