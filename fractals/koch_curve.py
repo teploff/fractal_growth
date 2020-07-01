@@ -202,6 +202,7 @@ class Curve:
             return
 
         min_iter = 0
+        max_iter = 0
         growths = [120, 60]
         union_segments = []
         while min_iter < max(growths) * (n_cycles - 2):
@@ -224,127 +225,19 @@ class Curve:
             # Заносим в список активных отрезков последние вычисленные отрезки
             self._active_segments = [segment for segments in depths for segment in segments[-1]]
 
-            # max_iter = sum(max(len(lines) for lines in depth) for depth in union_segments)
+            max_iter = sum(max(len(lines) for lines in depth) for depth in union_segments)
             min_iter = sum(min(len(lines) for lines in depth) for depth in union_segments)
 
-        line_1 = []
-        line_2 = []
-        line_3 = []
-        line_4 = []
+        buffer = [[]for _ in range(max_iter)]
+        for index_depths, depths in enumerate(union_segments):
+            for index_lines, lines in enumerate(depths):
+                for index_segments, segments in enumerate(lines):
+                    summ = 0
+                    temp_index_segemnts = index_lines
+                    for tem_lines in union_segments[:index_depths][::-1]:
+                        temp_index_segemnts //= 4
+                        summ += len(tem_lines[temp_index_segemnts])
+                    buffer[summ + index_segments] += segments
 
-        line_1 += [depth[: len(depth) // 4] for depth in union_segments]
-        line_2 += [depth[len(depth) // 4: len(depth) // 4 * 2] for depth in union_segments]
-        line_3 += [depth[len(depth) // 4 * 2: len(depth) // 4 * 3] for depth in union_segments]
-        line_4 += [depth[len(depth) // 4 * 3:] for depth in union_segments]
-
-        for iteration in range(min_iter):
-            buffer = []
-            for index, segments in enumerate(line_1[0]):
-                buffer += segments[0]
-                del line_1[0][index][0]
-            for index, segments in enumerate(line_2[0]):
-                buffer += segments[0]
-                del line_2[0][index][0]
-            for index, segments in enumerate(line_3[0]):
-                buffer += segments[0]
-                del line_3[0][index][0]
-            for index, segments in enumerate(line_4[0]):
-                buffer += segments[0]
-                del line_4[0][index][0]
-
-            self.lines.append(self._stick_segments_together_relative_the_point(buffer, CENTER))
-
-            if line_1[0][0] == []:
-                del line_1[0]
-
-            if line_2[0][0] == []:
-                del line_2[0]
-
-            if line_3[0][0] == []:
-                del line_3[0]
-
-            if line_4[0][0] == []:
-                del line_4[0]
-        pass
-
-        # buffer = union_segments[0][:]
-        # for index_depth, depth in enumerate(union_segments):
-        #     iterr = min(len(lines) for lines in buffer)
-        #     counter += iterr
-        #     aa = []
-        #     for _ in range(iterr):
-        #         segments = []
-        #         for lines in buffer:
-        #             segments += lines[0]
-        #             del lines[0]
-        #         aa.append(segments)
-        #
-        #     empty_list_index = [index for index in range(len(buffer)) if buffer[index] == []]
-        #     for index in empty_list_index:
-        #         if index_depth + 1 != len(union_segments):
-        #             del buffer[index]
-        #             buffer.insert(index, union_segments[index_depth + 1][4 * index: 4 * index + 4])
-        #         for i in range(4):
-        #             union_segments[index_depth + 1][4 * index + i] = []
-        #
-        #     for index in empty_list_index[::-1]:
-        #         temp = buffer[index]
-        #         del buffer[index]
-        #         for i in range(len(temp)):
-        #             buffer.insert(i + index, temp[i])
-        #     ###########################################################################################################
-        #     self.lines += [self._stick_segments_together_relative_the_point(depth_segments, CENTER) for depth_segments in aa]
-        #     ############################################################################################################
-        #     # break
-        #     if counter == min_iter:
-        #         break
-        #     # for i in range(len(union_segments[index_depth + 1][4 * index: 4 * index + 4])):
-        #     #     depth.insert(i + index, union_segments[index_depth + 1][4 * index: 4 * index + 4][i])
-        #     pass
-            # for index_lines, lines in enumerate(depth):
-            #     if len(lines) < max_iter:
-
-        # pass
-        # lolo = []
-        # for iteration in range(min_iter):
-        #     lolo[iteration] =
-        # for depth in range(min(len(union_segment) for union_segment in union_segments)):
-        #     depth_segments = [segment for segments in union_segments for segment in segments[depth]]
-        #
-        #     dx = CENTER.x - depth_segments[len(depth_segments)//2 - 1].finish.x
-        #     dy = CENTER.y - depth_segments[len(depth_segments)//2 - 1].finish.y
-        #     depth_segments[len(depth_segments)//2 - 1].start.x += dx
-        #     depth_segments[len(depth_segments)//2 - 1].start.y += dy
-        #     depth_segments[len(depth_segments)//2 - 1].finish.x += dx
-        #     depth_segments[len(depth_segments)//2 - 1].finish.y += dy
-        #     reference_point = depth_segments[len(depth_segments)//2 - 1].start
-        #     left_side = depth_segments[:len(depth_segments) // 2 - 1]
-        #     for line in left_side[::-1]:
-        #         dx = reference_point.x - line.finish.x
-        #         dy = reference_point.y - line.finish.y
-        #         line.start.x += dx
-        #         line.start.y += dy
-        #         line.finish.x += dx
-        #         line.finish.y += dy
-        #         reference_point = line.start
-        #
-        #     dx = CENTER.x - depth_segments[len(depth_segments) // 2].start.x
-        #     dy = CENTER.y - depth_segments[len(depth_segments) // 2].start.y
-        #     depth_segments[len(depth_segments) // 2].start.x += dx
-        #     depth_segments[len(depth_segments) // 2].start.y += dy
-        #     depth_segments[len(depth_segments) // 2].finish.x += dx
-        #     depth_segments[len(depth_segments) // 2].finish.y += dy
-        #     reference_point = depth_segments[len(depth_segments) // 2].finish
-        #     right_side = depth_segments[len(depth_segments) // 2 + 1:]
-        #     for line in right_side:
-        #         dx = reference_point.x - line.start.x
-        #         dy = reference_point.y - line.start.y
-        #         line.start.x += dx
-        #         line.start.y += dy
-        #         line.finish.x += dx
-        #         line.finish.y += dy
-        #         reference_point = line.finish
-        #
-        #     self.lines += [depth_segments]
-        #
-        # self._active_segments = self.lines[-1]
+        for index in range(min_iter):
+            self.lines.append(self._stick_segments_together_relative_the_point(buffer[index], CENTER))
