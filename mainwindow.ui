@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>620</width>
-    <height>456</height>
+    <width>652</width>
+    <height>490</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -216,7 +216,7 @@
            <item>
             <widget class="QLabel" name="l_several_phase_count_iter_a">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество итераций &lt;span style=&quot; font-style:italic;&quot;&gt;a&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент начальной длины &lt;span style=&quot; font-style:italic;&quot;&gt;a&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="textFormat">
               <enum>Qt::AutoText</enum>
@@ -240,21 +240,18 @@
             </spacer>
            </item>
            <item>
-            <widget class="QSpinBox" name="sb_several_phase_count_iter_a">
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
+            <widget class="QDoubleSpinBox" name="dsb_several_phase_count_iter_a">
              <property name="minimum">
-              <number>1</number>
+              <double>0.010000000000000</double>
              </property>
              <property name="maximum">
-              <number>200</number>
+              <double>1.000000000000000</double>
              </property>
              <property name="singleStep">
-              <number>5</number>
+              <double>0.010000000000000</double>
              </property>
              <property name="value">
-              <number>40</number>
+              <double>0.500000000000000</double>
              </property>
             </widget>
            </item>
@@ -265,7 +262,7 @@
            <item>
             <widget class="QLabel" name="l_several_phase_count_iter_b">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество итераций &lt;span style=&quot; font-style:italic;&quot;&gt;b&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент начальной длины &lt;span style=&quot; font-style:italic;&quot;&gt;h&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="textFormat">
               <enum>Qt::AutoText</enum>
@@ -289,21 +286,67 @@
             </spacer>
            </item>
            <item>
-            <widget class="QSpinBox" name="sb_several_phase_count_iter_b">
+            <widget class="QDoubleSpinBox" name="dsb_several_phase_count_iter_b">
+             <property name="minimum">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.250000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <item>
+            <widget class="QLabel" name="l_several_phase_k_growth">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент роста для &lt;span style=&quot; font-style:italic;&quot;&gt;a &lt;/span&gt;и &lt;span style=&quot; font-style:italic;&quot;&gt;b&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::AutoText</enum>
+             </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_10">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="dsb_several_phase_k_growth">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="minimum">
-              <number>1</number>
+              <double>0.000100000000000</double>
              </property>
              <property name="maximum">
-              <number>200</number>
+              <double>5245.000000000000000</double>
              </property>
              <property name="singleStep">
-              <number>5</number>
+              <double>0.012500000000000</double>
              </property>
              <property name="value">
-              <number>40</number>
+              <double>40.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -502,7 +545,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>620</width>
+     <width>652</width>
      <height>22</height>
     </rect>
    </property>

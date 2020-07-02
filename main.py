@@ -36,9 +36,11 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.rgb_background = WHITE
         self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
         self.l_several_phase_count_iter_a.setHidden(True)
-        self.sb_several_phase_count_iter_a.setHidden(True)
+        self.dsb_several_phase_count_iter_a.setHidden(True)
         self.l_several_phase_count_iter_b.setHidden(True)
-        self.sb_several_phase_count_iter_b.setHidden(True)
+        self.dsb_several_phase_count_iter_b.setHidden(True)
+        self.l_several_phase_k_growth.setHidden(True)
+        self.dsb_several_phase_k_growth.setHidden(True)
 
         pygame.init()
 
@@ -63,8 +65,9 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             settings["count_iter"] = self.sb_single_phase_count_iter_a.value()
         else:
             settings["model"] = "several"
-            settings["count_iter_a"] = self.sb_several_phase_count_iter_a
-            settings["count_iter_b"] = self.sb_several_phase_count_iter_b
+            settings["count_iter_a"] = self.dsb_several_phase_count_iter_a.value()
+            settings["count_iter_b"] = self.dsb_several_phase_count_iter_b.value()
+            settings["k_growth"] = int(self.dsb_several_phase_k_growth.value())
 
         koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
                            **settings)
@@ -154,9 +157,11 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.l_single_phase_count_iter_a.setHidden(False)
         self.sb_single_phase_count_iter_a.setHidden(False)
         self.l_several_phase_count_iter_a.setHidden(True)
-        self.sb_several_phase_count_iter_a.setHidden(True)
+        self.dsb_several_phase_count_iter_a.setHidden(True)
         self.l_several_phase_count_iter_b.setHidden(True)
-        self.sb_several_phase_count_iter_b.setHidden(True)
+        self.dsb_several_phase_count_iter_b.setHidden(True)
+        self.l_several_phase_k_growth.setHidden(True)
+        self.dsb_several_phase_k_growth.setHidden(True)
 
     def _enable_several_phases(self) -> None:
         """
@@ -167,9 +172,11 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.l_single_phase_count_iter_a.setHidden(True)
         self.sb_single_phase_count_iter_a.setHidden(True)
         self.l_several_phase_count_iter_a.setHidden(False)
-        self.sb_several_phase_count_iter_a.setHidden(False)
+        self.dsb_several_phase_count_iter_a.setHidden(False)
         self.l_several_phase_count_iter_b.setHidden(False)
-        self.sb_several_phase_count_iter_b.setHidden(False)
+        self.dsb_several_phase_count_iter_b.setHidden(False)
+        self.l_several_phase_k_growth.setHidden(False)
+        self.dsb_several_phase_k_growth.setHidden(False)
 
     @staticmethod
     def draw(lines: List[Segment], rgb_lines: Tuple[float, float, float], rgb_background: Tuple[float, float, float],

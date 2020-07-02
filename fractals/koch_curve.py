@@ -1,4 +1,5 @@
 import math
+from copy import deepcopy
 from typing import List
 
 from geometry.entity_2d import Segment, Point
@@ -90,6 +91,37 @@ class Curve:
         return segments
 
     @staticmethod
+    def _make_temp_construction(height, length, point: Point, curr_angle: float, angle: float) -> List[Segment]:
+        """
+
+        :param height:
+        :param length:
+        :param point:
+        :param curr_angle:
+        :param angle:
+        :return:
+        """
+
+        x_2 = point.x + length * math.cos(curr_angle * math.pi / 180.0)
+        y_2 = point.y + length * math.sin(curr_angle * math.pi / 180.0)
+
+        x_3 = x_2 + (height * math.cos((curr_angle + angle) * math.pi / 180.0)) / math.sin(angle * math.pi / 180.0)
+        y_3 = y_2 + (height * math.sin((curr_angle + angle) * math.pi / 180.0)) / math.sin(angle * math.pi / 180.0)
+
+        x_4 = x_3 + (height * math.cos((angle - curr_angle) * math.pi / 180.0)) / math.sin(angle * math.pi / 180.0)
+        y_4 = y_3 - (height * math.sin((angle - curr_angle) * math.pi / 180.0)) / math.sin(angle * math.pi / 180.0)
+
+        x_5 = x_4 + length * math.cos(curr_angle * math.pi / 180.0)
+        y_5 = y_4 + length * math.sin(curr_angle * math.pi / 180.0)
+
+        segment_1 = Segment(Point(point.x, point.y), Point(x_2, y_2))
+        segment_2 = Segment(Point(x_2, y_2), Point(x_3, y_3))
+        segment_3 = Segment(Point(x_3, y_3), Point(x_4, y_4))
+        segment_4 = Segment(Point(x_4, y_4), Point(x_5, y_5))
+
+        return [segment_1, segment_2, segment_3, segment_4]
+
+    @staticmethod
     def _stick_together(segments: List[Segment], point: Point) -> List[Segment]:
         """
 
@@ -167,8 +199,33 @@ class Curve:
 
         :return:
         """
-        # TODO: just do it
-        pass
+        self._engender_segment(self._settings["k_growth"])
+
+        if self._count_depth == 1:
+            return
+
+        length = self._settings["count_iter_a"] * self._max_l_l
+        height = self._settings["count_iter_b"] * self._max_l_l
+
+        while len(self._active_segments) < 4**(self._count_depth + 2):
+            grown_up_segments_exists = True
+            exist = False
+            while grown_up_segments_exists:
+                grown_up_segments_exists = False
+                for index, active_segment in enumerate(self._active_segments):
+                    if math.isclose(active_segment.len(), self._max_l_l, abs_tol=self._max_l_l/self._settings["k_growth"]):
+                        exist = True
+                        grown_up_segments_exists = True
+                        curr_angle = active_segment.get_triangle_angle()
+                        self._active_segments[index:index + 1] = self._make_temp_construction(height, length, active_segment.start, curr_angle, self._angle)
+                        break
+
+            if exist:
+                self.lines.append(deepcopy(self._stick_together(deepcopy(self._active_segments), CENTER)))
+
+            for active_segment in self._active_segments:
+                engender_segment(active_segment, self._max_l_l / self._settings["k_growth"])
+            self.lines.append(deepcopy(self._stick_together(deepcopy(self._active_segments), CENTER)))
 
     def build(self):
         """
