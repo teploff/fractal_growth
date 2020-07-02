@@ -42,6 +42,8 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.pb_build_point_path.clicked.connect(self._point_growth_path)
         self.pb_line_color.clicked.connect(self._pick_lines_color)
         self.pb_background_color.clicked.connect(self._pick_background_color)
+        self.rb_single_phase.clicked.connect(self._enable_single_phase)
+        self.rb_several_phase.clicked.connect(self._enable_several_phases)
 
     def _engender_fractal(self):
         """
@@ -50,7 +52,8 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         """
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
 
-        koch_curve = Curve(self.dsb_max_line_legth.value(), N_ITER)
+        koch_curve = Curve(self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                           self.sb_single_phase_count_iter.value())
         koch_curve.build(self.sb_fractal_depth.value())
 
         index = 0
@@ -127,6 +130,24 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
         self.rgb_background = (color.redF(), color.greenF(), color.blueF())
         self.pb_background_color.setStyleSheet(f"QWidget {{ background-color: {color.name()} }}")
+
+    def _enable_single_phase(self) -> None:
+        """
+
+        :return:
+        """
+
+        self.l_single_phase_count_iter.setHidden(False)
+        self.sb_single_phase_count_iter.setHidden(False)
+
+    def _enable_several_phases(self) -> None:
+        """
+
+        :return:
+        """
+
+        self.l_single_phase_count_iter.setHidden(True)
+        self.sb_single_phase_count_iter.setHidden(True)
 
     @staticmethod
     def draw(lines: List[Segment], rgb_lines: Tuple[float, float, float], rgb_background: Tuple[float, float, float],

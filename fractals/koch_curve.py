@@ -1,12 +1,10 @@
 import math
 from typing import List
-import itertools
 
 from geometry.entity_2d import Segment, Point
 from ontogeny.utils import engender_segment
 
 CENTER = Point(0.0, 0.0)
-BETA = 45.0
 
 
 class Curve:
@@ -14,14 +12,16 @@ class Curve:
 
     """
 
-    def __init__(self, max_l_l: float, max_n_iter: int):
+    def __init__(self, max_l_l: float, angle: float, max_n_iter: int):
         """
 
         :param max_l_l:
+        :param angle:
         :param max_n_iter:
         """
 
         self._max_l_l = max_l_l
+        self._angle = angle
         self._max_n_iter = max_n_iter
         self._active_segments = []
         self.lines = []
@@ -55,7 +55,7 @@ class Curve:
 
         angle = self._active_segments[0].get_triangle_angle()
         union_segments.append(self._make_construction(
-            self._max_n_iter, self._max_l_l, self._max_l_l / 2.0, self._active_segments[0].start, angle))
+            self._max_n_iter, self._angle, self._max_l_l, self._max_l_l / 2.0, self._active_segments[0].start, angle))
 
         for depth in range(len(union_segments[0])):
             depth_segments = [segment for segments in union_segments for segment in segments[depth]]
@@ -99,15 +99,16 @@ class Curve:
         self._active_segments = self.lines[-1]
 
     @staticmethod
-    def _make_construction(max_iter: int, max_length: float, start_length: float, point: Point, angle: float) -> \
+    def _make_construction(max_iter: int, angle: float, max_length: float, start_length: float, point: Point, curr_angle: float) -> \
             List[List[Segment]]:
         """
         Формирование списков промежуточных фаз роста фрактальной структуры.
         :param max_iter: Количество итераций роста фрактальной структуры.
+        :param angle: Угол равнобедренного треугольника.
         :param max_length: Предельное значение длины отрезка.
         :param start_length: Начальное знаение отрезка.
         :param point: Точка на основе которой просиходит рост.
-        :param angle: Угол наклона фрактальной структуры.
+        :param curr_angle: Угол наклона фрактальной структуры.
         :return: Список промежуточных фаз фрактальной структуры.
         """
         
@@ -116,20 +117,20 @@ class Curve:
         delta_length = (max_length - start_length) / max_iter
 
         for iteration in range(max_iter):
-            height = ((iteration + 1) / max_iter) * max_length * math.sin(BETA * math.pi / 180.0)
+            height = ((iteration + 1) / max_iter) * max_length * math.sin(angle * math.pi / 180.0)
             length += delta_length
 
-            x_2 = point.x + length * math.cos(angle * math.pi / 180.0)
-            y_2 = point.y + length * math.sin(angle * math.pi / 180.0)
+            x_2 = point.x + length * math.cos(curr_angle * math.pi / 180.0)
+            y_2 = point.y + length * math.sin(curr_angle * math.pi / 180.0)
 
-            x_3 = x_2 + (height * math.cos((angle + BETA) * math.pi / 180.0)) / math.sin(BETA * math.pi / 180.0)
-            y_3 = y_2 + (height * math.sin((angle + BETA) * math.pi / 180.0)) / math.sin(BETA * math.pi / 180.0)
+            x_3 = x_2 + (height * math.cos((curr_angle + angle) * math.pi / 180.0)) / math.sin(angle * math.pi / 180.0)
+            y_3 = y_2 + (height * math.sin((curr_angle + angle) * math.pi / 180.0)) / math.sin(angle * math.pi / 180.0)
 
-            x_4 = x_3 + (height * math.cos((BETA - angle) * math.pi / 180.0)) / math.sin(BETA * math.pi / 180.0)
-            y_4 = y_3 - (height * math.sin((BETA - angle) * math.pi / 180.0)) / math.sin(BETA * math.pi / 180.0)
+            x_4 = x_3 + (height * math.cos((angle - curr_angle) * math.pi / 180.0)) / math.sin(angle * math.pi / 180.0)
+            y_4 = y_3 - (height * math.sin((angle - curr_angle) * math.pi / 180.0)) / math.sin(angle * math.pi / 180.0)
 
-            x_5 = x_4 + length * math.cos(angle * math.pi / 180.0)
-            y_5 = y_4 + length * math.sin(angle * math.pi / 180.0)
+            x_5 = x_4 + length * math.cos(curr_angle * math.pi / 180.0)
+            y_5 = y_4 + length * math.sin(curr_angle * math.pi / 180.0)
 
             segment_1 = Segment(Point(point.x, point.y), Point(x_2, y_2))
             segment_2 = Segment(Point(x_2, y_2), Point(x_3, y_3))
@@ -203,7 +204,7 @@ class Curve:
 
         min_iter = 0
         max_iter = 0
-        growths = [120, 60]
+        growths = [60, 60]
         union_segments = []
         while min_iter < max(growths) * (n_cycles - 2):
             depths = [[] for _ in range(len(self._active_segments))]
@@ -211,12 +212,12 @@ class Curve:
             for index in range(len(self._active_segments) // 2):
                 angle = self._active_segments[index].get_triangle_angle()
                 depths[index] = self._make_construction(
-                    growths[index % len(growths)], self._max_l_l, self._max_l_l / 2.0,
+                    growths[index % len(growths)], self._angle, self._max_l_l, self._max_l_l / 2.0,
                     self._active_segments[index].start, angle)
 
                 angle = self._active_segments[len(self._active_segments) - 1 - index].get_triangle_angle()
                 depths[len(self._active_segments) - 1 - index] = self._make_construction(
-                    growths[index % len(growths)], self._max_l_l, self._max_l_l / 2.0,
+                    growths[index % len(growths)], self._angle, self._max_l_l, self._max_l_l / 2.0,
                     self._active_segments[len(self._active_segments) - 1 - index].start, angle)
 
             # ...
