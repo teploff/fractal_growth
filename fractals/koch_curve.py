@@ -12,23 +12,24 @@ class Curve:
 
     """
 
-    def __init__(self, max_l_l: float, angle: float, max_n_iter: int):
+    def __init__(self, count_depth: int, line_len: float, angle: float, **settings):
+        """
+        Инициализация параметро построения фрактальной структуры.
+        :param count_depth: Глубина построения фрактала.
+        :param line_len: Предельное значение длины отрезка.
+        :param angle: Угол равнобередренного треугольника в градусах.
+        :param settings: Дополнительные настройки.
         """
 
-        :param max_l_l:
-        :param angle:
-        :param max_n_iter:
-        """
-
-        self._max_l_l = max_l_l
+        self._count_depth = count_depth
+        self._max_l_l = line_len
         self._angle = angle
-        self._max_n_iter = max_n_iter
+        self._settings = settings
+
         self._active_segments = []
         self.lines = []
 
-        self._engender_segment()
-
-    def _engender_segment(self):
+    def _engender_segment(self, count_iter: int):
         """
 
         :return:
@@ -39,68 +40,15 @@ class Curve:
 
         while segment.len() < self._max_l_l:
             segment = Segment(Point(segment.start.x, segment.start.y), Point(segment.finish.x, segment.finish.y))
-            engender_segment(segment, self._max_l_l / self._max_n_iter)
+            engender_segment(segment, self._max_l_l / count_iter)
 
             self.lines.append([segment])
 
         self._active_segments.append(segment)
 
-    def _engender_primitive(self):
-        """
-
-        :return:
-        """
-
-        union_segments = []
-
-        angle = self._active_segments[0].get_triangle_angle()
-        union_segments.append(self._make_construction(
-            self._max_n_iter, self._angle, self._max_l_l, self._max_l_l / 2.0, self._active_segments[0].start, angle))
-
-        for depth in range(len(union_segments[0])):
-            depth_segments = [segment for segments in union_segments for segment in segments[depth]]
-
-            dx = CENTER.x - depth_segments[len(depth_segments) // 2 - 1].finish.x
-            dy = CENTER.y - depth_segments[len(depth_segments) // 2 - 1].finish.y
-            depth_segments[len(depth_segments) // 2 - 1].start.x += dx
-            depth_segments[len(depth_segments) // 2 - 1].start.y += dy
-            depth_segments[len(depth_segments) // 2 - 1].finish.x += dx
-            depth_segments[len(depth_segments) // 2 - 1].finish.y += dy
-            reference_point = depth_segments[len(depth_segments) // 2 - 1].start
-            left_side = depth_segments[:len(depth_segments) // 2 - 1]
-            for line in left_side[::-1]:
-                dx = reference_point.x - line.finish.x
-                dy = reference_point.y - line.finish.y
-                line.start.x += dx
-                line.start.y += dy
-                line.finish.x += dx
-                line.finish.y += dy
-                reference_point = line.start
-
-            dx = CENTER.x - depth_segments[len(depth_segments) // 2].start.x
-            dy = CENTER.y - depth_segments[len(depth_segments) // 2].start.y
-            depth_segments[len(depth_segments) // 2].start.x += dx
-            depth_segments[len(depth_segments) // 2].start.y += dy
-            depth_segments[len(depth_segments) // 2].finish.x += dx
-            depth_segments[len(depth_segments) // 2].finish.y += dy
-            reference_point = depth_segments[len(depth_segments) // 2].finish
-            right_side = depth_segments[len(depth_segments) // 2 + 1:]
-            for line in right_side:
-                dx = reference_point.x - line.start.x
-                dy = reference_point.y - line.start.y
-                line.start.x += dx
-                line.start.y += dy
-                line.finish.x += dx
-                line.finish.y += dy
-                reference_point = line.finish
-
-            self.lines += [depth_segments]
-
-        self._active_segments = self.lines[-1]
-
     @staticmethod
-    def _make_construction(max_iter: int, angle: float, max_length: float, start_length: float, point: Point, curr_angle: float) -> \
-            List[List[Segment]]:
+    def _make_construction(max_iter: int, angle: float, max_length: float, start_length: float, point: Point,
+                           curr_angle: float) -> List[List[Segment]]:
         """
         Формирование списков промежуточных фаз роста фрактальной структуры.
         :param max_iter: Количество итераций роста фрактальной структуры.
@@ -187,25 +135,25 @@ class Curve:
 
         return segments
 
-    def build(self, n_cycles: int):
+    def _calculate_single_phase(self):
         """
-
-        :param n_cycles:
+        Вычисление однофазной фраткальной структуры.
         :return:
         """
+        self._engender_segment(self._settings["count_iter"])
 
-        if n_cycles == 1:
+        if self._count_depth == 1:
             return
 
-        for cycle in range(n_cycles - 1):
+        for cycle in range(self._count_depth - 1):
             segments_phase = []
 
             for active_segment in self._active_segments:
                 angle = active_segment.get_triangle_angle()
                 segments_phase.append(self._make_construction(
-                    self._max_n_iter, self._angle, self._max_l_l, self._max_l_l / 2.0, active_segment.start, angle))
+                    self._settings["count_iter"], self._angle, self._max_l_l, self._max_l_l / 2.0, active_segment.start, angle))
 
-            for iteration in range(self._max_n_iter):
+            for iteration in range(self._settings["count_iter"]):
                 union_segments = []
                 for segments in segments_phase:
                     union_segments += segments[iteration]
@@ -213,3 +161,22 @@ class Curve:
 
             # Заносим в список активных отрезков последние вычисленные отрезки
             self._active_segments = [segment for segments in segments_phase for segment in segments[-1]]
+
+    def _calculate_several_phases(self):
+        """
+
+        :return:
+        """
+        # TODO: just do it
+        pass
+
+    def build(self):
+        """
+        Вычисление фратклаьной структуры.
+        :return:
+        """
+
+        if self._settings["model"] == "single":
+            self._calculate_single_phase()
+        else:
+            self._calculate_several_phases()

@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import pygame
 import sys  # sys нужен для передачи argv в QApplication
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 import design  # Это наш конвертированный файл дизайна
 from OpenGL.GL import *
 # from OpenGL.GLU import *
@@ -31,9 +31,14 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        # default colors value for lines and background
+        # make default settings
         self.rgb_lines = BLACK
         self.rgb_background = WHITE
+        self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
+        self.l_several_phase_count_iter_a.setHidden(True)
+        self.sb_several_phase_count_iter_a.setHidden(True)
+        self.l_several_phase_count_iter_b.setHidden(True)
+        self.sb_several_phase_count_iter_b.setHidden(True)
 
         pygame.init()
 
@@ -52,9 +57,18 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         """
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
 
-        koch_curve = Curve(self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                           self.sb_single_phase_count_iter.value())
-        koch_curve.build(self.sb_fractal_depth.value())
+        settings = dict()
+        if self.rb_single_phase.isChecked():
+            settings["model"] = "single"
+            settings["count_iter"] = self.sb_single_phase_count_iter_a.value()
+        else:
+            settings["model"] = "several"
+            settings["count_iter_a"] = self.sb_several_phase_count_iter_a
+            settings["count_iter_b"] = self.sb_several_phase_count_iter_b
+
+        koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                           **settings)
+        koch_curve.build()
 
         index = 0
         quit_mode = False
@@ -133,21 +147,29 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
     def _enable_single_phase(self) -> None:
         """
-
+        Выбор построения однофазной модели.
         :return:
         """
-
-        self.l_single_phase_count_iter.setHidden(False)
-        self.sb_single_phase_count_iter.setHidden(False)
+        self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
+        self.l_single_phase_count_iter_a.setHidden(False)
+        self.sb_single_phase_count_iter_a.setHidden(False)
+        self.l_several_phase_count_iter_a.setHidden(True)
+        self.sb_several_phase_count_iter_a.setHidden(True)
+        self.l_several_phase_count_iter_b.setHidden(True)
+        self.sb_several_phase_count_iter_b.setHidden(True)
 
     def _enable_several_phases(self) -> None:
         """
-
+        Выбор построения многофазной модели.
         :return:
         """
-
-        self.l_single_phase_count_iter.setHidden(True)
-        self.sb_single_phase_count_iter.setHidden(True)
+        self.l_image.setPixmap(QtGui.QPixmap("./static/several_phases_model.png"))
+        self.l_single_phase_count_iter_a.setHidden(True)
+        self.sb_single_phase_count_iter_a.setHidden(True)
+        self.l_several_phase_count_iter_a.setHidden(False)
+        self.sb_several_phase_count_iter_a.setHidden(False)
+        self.l_several_phase_count_iter_b.setHidden(False)
+        self.sb_several_phase_count_iter_b.setHidden(False)
 
     @staticmethod
     def draw(lines: List[Segment], rgb_lines: Tuple[float, float, float], rgb_background: Tuple[float, float, float],
