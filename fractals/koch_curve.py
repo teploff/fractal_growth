@@ -142,7 +142,7 @@ class Curve:
         return segments
 
     @staticmethod
-    def _stick_segments_together_relative_the_point(segments: List[Segment], point: Point) -> List[Segment]:
+    def _stick_together(segments: List[Segment], point: Point) -> List[Segment]:
         """
 
         :param segments:
@@ -197,48 +197,19 @@ class Curve:
         if n_cycles == 1:
             return
 
-        self._engender_primitive()
+        for cycle in range(n_cycles - 1):
+            segments_phase = []
 
-        if n_cycles == 2:
-            return
+            for active_segment in self._active_segments:
+                angle = active_segment.get_triangle_angle()
+                segments_phase.append(self._make_construction(
+                    self._max_n_iter, self._angle, self._max_l_l, self._max_l_l / 2.0, active_segment.start, angle))
 
-        min_iter = 0
-        max_iter = 0
-        growths = [60, 60]
-        union_segments = []
-        while min_iter < max(growths) * (n_cycles - 2):
-            depths = [[] for _ in range(len(self._active_segments))]
-
-            for index in range(len(self._active_segments) // 2):
-                angle = self._active_segments[index].get_triangle_angle()
-                depths[index] = self._make_construction(
-                    growths[index % len(growths)], self._angle, self._max_l_l, self._max_l_l / 2.0,
-                    self._active_segments[index].start, angle)
-
-                angle = self._active_segments[len(self._active_segments) - 1 - index].get_triangle_angle()
-                depths[len(self._active_segments) - 1 - index] = self._make_construction(
-                    growths[index % len(growths)], self._angle, self._max_l_l, self._max_l_l / 2.0,
-                    self._active_segments[len(self._active_segments) - 1 - index].start, angle)
-
-            # ...
-            union_segments.append(depths)
+            for iteration in range(self._max_n_iter):
+                union_segments = []
+                for segments in segments_phase:
+                    union_segments += segments[iteration]
+                self.lines.append(self._stick_together(union_segments, CENTER))
 
             # Заносим в список активных отрезков последние вычисленные отрезки
-            self._active_segments = [segment for segments in depths for segment in segments[-1]]
-
-            max_iter = sum(max(len(lines) for lines in depth) for depth in union_segments)
-            min_iter = sum(min(len(lines) for lines in depth) for depth in union_segments)
-
-        buffer = [[]for _ in range(max_iter)]
-        for index_depths, depths in enumerate(union_segments):
-            for index_lines, lines in enumerate(depths):
-                for index_segments, segments in enumerate(lines):
-                    summ = 0
-                    temp_index_segemnts = index_lines
-                    for tem_lines in union_segments[:index_depths][::-1]:
-                        temp_index_segemnts //= 4
-                        summ += len(tem_lines[temp_index_segemnts])
-                    buffer[summ + index_segments] += segments
-
-        for index in range(min_iter):
-            self.lines.append(self._stick_segments_together_relative_the_point(buffer[index], CENTER))
+            self._active_segments = [segment for segments in segments_phase for segment in segments[-1]]
