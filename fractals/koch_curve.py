@@ -172,7 +172,7 @@ class Curve:
         Вычисление однофазной фраткальной структуры.
         :return:
         """
-        self._engender_segment(self._settings["count_iter"])
+        self._engender_segment(self._settings["count_iterations"])
 
         if self._count_depth == 1:
             return
@@ -183,9 +183,10 @@ class Curve:
             for active_segment in self._active_segments:
                 angle = active_segment.get_triangle_angle()
                 segments_phase.append(self._make_construction(
-                    self._settings["count_iter"], self._angle, self._max_l_l, self._max_l_l / 2.0, active_segment.start, angle))
+                    self._settings["count_iterations"], self._angle, self._max_l_l, self._max_l_l / 2.0,
+                    active_segment.start, angle))
 
-            for iteration in range(self._settings["count_iter"]):
+            for iteration in range(self._settings["count_iterations"]):
                 union_segments = []
                 for segments in segments_phase:
                     union_segments += segments[iteration]
@@ -199,13 +200,13 @@ class Curve:
 
         :return:
         """
-        self._engender_segment(self._settings["k_growth"])
+        self._engender_segment(self._settings["count_iterations"])
 
         if self._count_depth == 1:
             return
 
-        length = self._settings["count_iter_a"] * self._max_l_l
-        height = self._settings["count_iter_b"] * self._max_l_l
+        length = self._settings["coefficient_a"] * self._max_l_l
+        height = self._settings["coefficient_h"] * self._max_l_l
 
         while len(self._active_segments) < 4**(self._count_depth + 2):
             grown_up_segments_exists = True
@@ -213,18 +214,20 @@ class Curve:
             while grown_up_segments_exists:
                 grown_up_segments_exists = False
                 for index, active_segment in enumerate(self._active_segments):
-                    if math.isclose(active_segment.len(), self._max_l_l, abs_tol=self._max_l_l/self._settings["k_growth"]):
+                    if math.isclose(active_segment.len(), self._max_l_l,
+                                    abs_tol=self._max_l_l/self._settings["count_iterations"]):
                         exist = True
                         grown_up_segments_exists = True
                         curr_angle = active_segment.get_triangle_angle()
-                        self._active_segments[index:index + 1] = self._make_temp_construction(height, length, active_segment.start, curr_angle, self._angle)
+                        self._active_segments[index:index + 1] = self._make_temp_construction(
+                            height, length, active_segment.start, curr_angle, self._angle)
                         break
 
             if exist:
                 self.lines.append(deepcopy(self._stick_together(deepcopy(self._active_segments), CENTER)))
 
             for active_segment in self._active_segments:
-                engender_segment(active_segment, self._max_l_l / self._settings["k_growth"])
+                engender_segment(active_segment, self._max_l_l / self._settings["count_iterations"])
             self.lines.append(deepcopy(self._stick_together(deepcopy(self._active_segments), CENTER)))
 
     def build(self):

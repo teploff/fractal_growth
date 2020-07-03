@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>652</width>
-    <height>490</height>
+    <width>750</width>
+    <height>743</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -165,9 +165,9 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_10">
            <item>
-            <widget class="QLabel" name="l_single_phase_count_iter_a">
+            <widget class="QLabel" name="l_single_phase_count_iterations">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество итераций &lt;span style=&quot; font-style:italic;&quot;&gt;a&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество итераций роста отрезка &lt;span style=&quot; font-style:italic;&quot;&gt;a&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="textFormat">
               <enum>Qt::AutoText</enum>
@@ -191,7 +191,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QSpinBox" name="sb_single_phase_count_iter_a">
+            <widget class="QSpinBox" name="sb_single_phase_count_iterations">
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
@@ -214,9 +214,9 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_12">
            <item>
-            <widget class="QLabel" name="l_several_phase_count_iter_a">
+            <widget class="QLabel" name="l_several_phase_coefficient_a">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент начальной длины &lt;span style=&quot; font-style:italic;&quot;&gt;a&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент начальной длины отрезка &lt;span style=&quot; font-style:italic;&quot;&gt;a&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="textFormat">
               <enum>Qt::AutoText</enum>
@@ -240,7 +240,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="dsb_several_phase_count_iter_a">
+            <widget class="QDoubleSpinBox" name="dsb_several_phase_coefficient_a">
              <property name="minimum">
               <double>0.010000000000000</double>
              </property>
@@ -260,9 +260,9 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_13">
            <item>
-            <widget class="QLabel" name="l_several_phase_count_iter_b">
+            <widget class="QLabel" name="l_several_phase_coefficient_h">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент начальной длины &lt;span style=&quot; font-style:italic;&quot;&gt;h&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент начальной длины отрезка &lt;span style=&quot; font-style:italic;&quot;&gt;h&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="textFormat">
               <enum>Qt::AutoText</enum>
@@ -286,7 +286,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="dsb_several_phase_count_iter_b">
+            <widget class="QDoubleSpinBox" name="dsb_several_phase_coefficient_h">
              <property name="minimum">
               <double>0.010000000000000</double>
              </property>
@@ -306,9 +306,9 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_14">
            <item>
-            <widget class="QLabel" name="l_several_phase_k_growth">
+            <widget class="QLabel" name="l_several_phase_count_iterations">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент роста для &lt;span style=&quot; font-style:italic;&quot;&gt;a &lt;/span&gt;и &lt;span style=&quot; font-style:italic;&quot;&gt;b&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество итераций роста отрезков &lt;span style=&quot; font-style:italic;&quot;&gt;a &lt;/span&gt;и &lt;span style=&quot; font-style:italic;&quot;&gt;b&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="textFormat">
               <enum>Qt::AutoText</enum>
@@ -332,21 +332,21 @@
             </spacer>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="dsb_several_phase_k_growth">
-             <property name="decimals">
-              <number>4</number>
+            <widget class="QSpinBox" name="sb_several_phase_count_iterations">
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
              <property name="minimum">
-              <double>0.000100000000000</double>
+              <number>1</number>
              </property>
              <property name="maximum">
-              <double>5245.000000000000000</double>
+              <number>200</number>
              </property>
              <property name="singleStep">
-              <double>0.012500000000000</double>
+              <number>5</number>
              </property>
              <property name="value">
-              <double>40.000000000000000</double>
+              <number>40</number>
              </property>
             </widget>
            </item>
@@ -545,7 +545,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>652</width>
+     <width>750</width>
      <height>22</height>
     </rect>
    </property>
