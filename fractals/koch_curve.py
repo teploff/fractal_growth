@@ -30,9 +30,10 @@ class Curve:
         self._active_segments = []
         self.lines = []
 
-    def _engender_segment(self, count_iter: int):
+    def _engender_segment(self, count_iterations: int) -> None:
         """
-
+        Формирование списка промежуточных фаз роста прямой за count_iterations итераций.
+        :param count_iterations: Количество итераций роста.
         :return:
         """
 
@@ -41,7 +42,7 @@ class Curve:
 
         while segment.len() < self._max_l_l:
             segment = Segment(Point(segment.start.x, segment.start.y), Point(segment.finish.x, segment.finish.y))
-            engender_segment(segment, self._max_l_l / count_iter)
+            engender_segment(segment, self._max_l_l / count_iterations)
 
             self.lines.append([segment])
 
@@ -129,7 +130,6 @@ class Curve:
         :param point:
         :return:
         """
-
         # TODO: make it pretty!!!
         dx = point.x - segments[len(segments) // 2 - 1].finish.x
         dy = point.y - segments[len(segments) // 2 - 1].finish.y
@@ -167,7 +167,7 @@ class Curve:
 
         return segments
 
-    def _calculate_single_phase(self):
+    def _calculate_single_phase(self) -> None:
         """
         Вычисление однофазной фраткальной структуры.
         :return:
@@ -177,7 +177,7 @@ class Curve:
         if self._count_depth == 1:
             return
 
-        for cycle in range(self._count_depth - 1):
+        for _ in range(self._count_depth - 1):
             segments_phase = []
 
             for active_segment in self._active_segments:
@@ -195,9 +195,9 @@ class Curve:
             # Заносим в список активных отрезков последние вычисленные отрезки
             self._active_segments = [segment for segments in segments_phase for segment in segments[-1]]
 
-    def _calculate_several_phases(self):
+    def _calculate_several_phases(self) -> None:
         """
-
+        Вычисление многофазной фраткальной структуры.
         :return:
         """
         self._engender_segment(self._settings["count_iterations"])
@@ -235,8 +235,9 @@ class Curve:
         Вычисление фратклаьной структуры.
         :return:
         """
-
         if self._settings["model"] == "single":
             self._calculate_single_phase()
-        else:
+        elif self._settings["model"] == "several":
             self._calculate_several_phases()
+        else:
+            raise ValueError("Unknown model")
