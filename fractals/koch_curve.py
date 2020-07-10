@@ -48,6 +48,21 @@ class Curve:
 
         self._active_segments.append(segment)
 
+    def _make_frame(self, corners_number: int, radius: float) -> None:
+        """
+        Формирование карскаса правильной фигуры для дальнейшего модифицирования кривой Коха.
+        :param corners_number: Количество углов правильной фигуры.
+        :param radius: Величина радиуса фигуры
+        :return:
+        """
+        # TODO:
+        points = [Point(radius * math.cos(2 * math.pi * i / corners_number) + CENTER.x,
+                        radius * math.sin(2 * math.pi * i / corners_number) + CENTER.y)
+                  for i in range(corners_number)]
+
+        self.lines = [Segment(points[i], points[i + 1]) for i in range(corners_number - 1)]
+        self._active_segments = deepcopy(self.lines)
+
     @staticmethod
     def _make_construction(max_iter: int, angle: float, max_length: float, start_length: float, point: Point,
                            curr_angle: float) -> List[List[Segment]]:

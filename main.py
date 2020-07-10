@@ -8,6 +8,7 @@ from OpenGL.GL import *
 from geometry.entity_2d import Segment
 from fractals.koch_curve import Curve
 from PIL import Image, ImageOps
+import matplotlib.pyplot as plt
 
 
 SCROLL_UP = 4
@@ -51,6 +52,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.pb_background_color.clicked.connect(self._pick_background_color)
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
         self.rb_several_phase.clicked.connect(self._enable_several_phases)
+        self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
 
     def _engender_fractal(self):
         """
@@ -177,6 +179,37 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.dsb_several_phase_coefficient_h.setHidden(False)
         self.l_several_phase_count_iterations.setHidden(False)
         self.sb_several_phase_count_iterations.setHidden(False)
+
+    def _plot_graph_line_len(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: refactoring
+        settings = dict()
+        if self.rb_single_phase.isChecked():
+            settings["model"] = "single"
+            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
+        else:
+            settings["model"] = "several"
+            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
+        koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                           **settings)
+        koch_curve.build()
+
+        t = [sum(line.len() for line in lines)for lines in koch_curve.lines]
+        s = [i for i in range(len(koch_curve.lines))]
+
+        fig, ax = plt.subplots()
+        ax.plot(s, t)
+
+        ax.set(xlabel='Количество фаз (ед.)', ylabel='Длина фрактала (ед.)',
+               title='Зависимость длины фрактала от количества фаз')
+        ax.grid()
+
+        plt.show()
 
     @staticmethod
     def draw(lines: List[Segment], rgb_lines: Tuple[float, float, float], rgb_background: Tuple[float, float, float],
