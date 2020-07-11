@@ -2,7 +2,7 @@ import math
 import numpy
 from typing import List
 
-from geometry.constants import ABSCISSA, ORDINATE
+from geometry.const import ABSCISSA, ORDINATE
 from geometry.entity_2d import Point, Segment
 
 

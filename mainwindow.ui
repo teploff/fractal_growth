@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>698</width>
-    <height>588</height>
+    <height>630</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QVBoxLayout" name="verticalLayout_6">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_11">
       <item>
@@ -543,7 +543,7 @@
       <property name="title">
        <string>Построение графиков зависимостей</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_16">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_15">
          <item>
@@ -555,6 +555,24 @@
          </item>
          <item>
           <widget class="QPushButton" name="pb_graph_line_len">
+           <property name="text">
+            <string>Построить</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_16">
+         <item>
+          <widget class="QLabel" name="lb_graph_angle">
+           <property name="text">
+            <string>Значение углов от количества фаз</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pb_graph_angle">
            <property name="text">
             <string>Построить</string>
            </property>

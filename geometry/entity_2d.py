@@ -1,12 +1,12 @@
 import math
 import numpy
 from typing import Union
-from geometry.constants import ABSCISSA, ORDINATE, ACCURACY
+from geometry.const import ABSCISSA, ORDINATE, ACCURACY
 
 
 class Point:
     """
-    Класс точка, содержащая две координаты x и y
+    Класс точка, содержащая две координаты x и y.
     """
 
     def __init__(self, x: float, y: float):
@@ -24,13 +24,13 @@ class Point:
 
 class Segment:
     """
-    Класс отрезок, содержащая две точки: начальная и конечная
+    Класс отрезок, содержащая две точки: начальная и конечная.
     """
 
     def __init__(self, start: Point, finish: Point):
         """
-        :param start: Начальная точка
-        :param finish: Конечная точка
+        :param start: Начальная точка.
+        :param finish: Конечная точка.
         """
 
         self.start, self.finish = start, finish
@@ -38,30 +38,10 @@ class Segment:
     def __repr__(self):
         return f'Start({self.start}), Finish{self.finish})'
 
-    @staticmethod
-    def _make_order_points(p1: Point, p2: Point) -> (Point, Point):
-        """
-
-        :param p1:
-        :param p2:
-        :return:
-        """
-
-        if p1.y < p2.y:
-            return p1, p2
-        elif math.isclose(p1.y, p2.y, abs_tol=ACCURACY):
-            if p1.x < p2.x:
-                return p1, p2
-            else:
-                return p2, p1
-        else:
-            return p2, p1
-
     def len(self) -> float:
         """
-        Вычисление длины отрезка
-
-        :return: Велична длины отрезка
+        Вычисление длины отрезка.
+        :return: Велична длины отрезка.
         """
 
         return math.sqrt((self.finish.x - self.start.x) ** 2 + (self.finish.y - self.start.y) ** 2)
@@ -69,9 +49,8 @@ class Segment:
     def does_point_belong(self, point: Point) -> bool:
         """
         Принадлежит ли указанная точка point отрезку?
-
-        :param point: Указанная точка
-        :return: Признак принадлежности точки. Принадлежит - True, не принадлежит - False
+        :param point: Точка, подвергающаяся проверки принадлежности.
+        :return: Признак принадлежности точки. Принадлежит - True, не принадлежит - False.
         """
 
         cross_product = (point.y - self.start.y) * (self.finish.x - self.start.x) - \
@@ -136,7 +115,7 @@ class Segment:
         """
         Вычислить угол поворота или меру поворота подвижного радиус-вектора относительно его начального положения.
         Подробнее тут: http://twt.mpei.ac.ru/math/TRIG/TR_010100.html
-        :return: Положительное значение угла поворота в градусах
+        :return: Положительное значение угла поворота в градусах.
         """
 
         # Если отрезок расположен перпендикулярно абсциссе
@@ -173,27 +152,3 @@ class Segment:
                 angle += 180.0
 
         return angle
-
-    def rotate_at_angle(self, angle: float):
-        """
-
-        :param angle:
-        :return:
-        """
-
-        self.finish.x = math.cos(angle * math.pi / 180.0)
-        self.finish.y = math.sin(angle * math.pi / 180.0)
-
-    def move_by_coord(self, d_x: float, d_y: float):
-        """
-
-        :param d_x:
-        :param d_y:
-        :return:
-        """
-
-        self.start.x += d_x
-        self.start.y += d_y
-
-        self.finish.x += d_x
-        self.finish.y += d_y

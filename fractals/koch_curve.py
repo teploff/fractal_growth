@@ -1,11 +1,10 @@
-import math
 from copy import deepcopy
+import math
 from typing import List
 
+from fractals.const import CENTER
 from geometry.entity_2d import Segment, Point
 from ontogeny.utils import engender_segment
-
-CENTER = Point(0.0, 0.0)
 
 
 class Curve:

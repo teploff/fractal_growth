@@ -53,6 +53,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
         self.rb_several_phase.clicked.connect(self._enable_several_phases)
         self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
+        self.pb_graph_angle.clicked.connect(self._plot_graph_angle)
 
     def _engender_fractal(self):
         """
@@ -209,6 +210,34 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                title='Зависимость длины фрактала от количества фаз')
         ax.grid()
 
+        plt.show()
+
+    def _plot_graph_angle(self):
+        """
+
+        :return:
+        """
+        # TODO: refactoring
+        settings = dict()
+        if self.rb_single_phase.isChecked():
+            settings["model"] = "single"
+            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
+        else:
+            settings["model"] = "several"
+            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
+        koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                           **settings)
+        koch_curve.build()
+
+        fig, ax = plt.subplots()
+
+        t = [line.get_triangle_angle() for lines in koch_curve.lines for line in lines]
+        s = [phase for phase, lines in enumerate(koch_curve.lines) for _ in lines]
+
+        ax.plot(s, t, 'o', ms=10, alpha=0.7, mfc='orange')
+        ax.grid()
         plt.show()
 
     @staticmethod
