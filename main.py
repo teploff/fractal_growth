@@ -36,12 +36,16 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.rgb_lines = BLACK
         self.rgb_background = WHITE
         self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
+        self.lb_regular_polygon_count_angle.setHidden(True)
+        self.sb_regular_polygon_count_angle.setHidden(True)
+        self.rb_regular_polygon_build_inside.setHidden(True)
+        self.rb_regular_polygon_build_outside.setHidden(True)
         self.l_several_phase_coefficient_a.setHidden(True)
         self.dsb_several_phase_coefficient_a.setHidden(True)
         self.l_several_phase_coefficient_h.setHidden(True)
         self.dsb_several_phase_coefficient_h.setHidden(True)
         self.l_several_phase_count_iterations.setHidden(True)
-        self.l_several_phase_count_iterations.setHidden(True)
+        self.sb_several_phase_count_iterations.setHidden(True)
 
         pygame.init()
 
@@ -52,6 +56,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.pb_background_color.clicked.connect(self._pick_background_color)
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
         self.rb_several_phase.clicked.connect(self._enable_several_phases)
+        self.rb_regular_polygon.clicked.connect(self._enable_regular_polygon)
         self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
         self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
         self.pb_graph_angle.clicked.connect(self._plot_graph_angle)
@@ -67,11 +72,16 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         if self.rb_single_phase.isChecked():
             settings["model"] = "single"
             settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
-        else:
+        elif self.rb_several_phase.isChecked():
             settings["model"] = "several"
             settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
             settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
             settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
+        else:
+            settings["model"] = "regular_polygon"
+            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
+            settings["count_angles"] = self.sb_regular_polygon_count_angle.value()
+            settings["building_way"] = "inside" if self.rb_regular_polygon_build_inside.isChecked() else "outside"
 
         koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
                            **settings)
@@ -160,6 +170,10 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
         self.l_single_phase_count_iterations.setHidden(False)
         self.sb_single_phase_count_iterations.setHidden(False)
+        self.lb_regular_polygon_count_angle.setHidden(True)
+        self.sb_regular_polygon_count_angle.setHidden(True)
+        self.rb_regular_polygon_build_inside.setHidden(True)
+        self.rb_regular_polygon_build_outside.setHidden(True)
         self.l_several_phase_coefficient_a.setHidden(True)
         self.dsb_several_phase_coefficient_a.setHidden(True)
         self.l_several_phase_coefficient_h.setHidden(True)
@@ -175,12 +189,35 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.l_image.setPixmap(QtGui.QPixmap("./static/several_phases_model.png"))
         self.l_single_phase_count_iterations.setHidden(True)
         self.sb_single_phase_count_iterations.setHidden(True)
+        self.lb_regular_polygon_count_angle.setHidden(True)
+        self.sb_regular_polygon_count_angle.setHidden(True)
+        self.rb_regular_polygon_build_inside.setHidden(True)
+        self.rb_regular_polygon_build_outside.setHidden(True)
         self.l_several_phase_coefficient_a.setHidden(False)
         self.dsb_several_phase_coefficient_a.setHidden(False)
         self.l_several_phase_coefficient_h.setHidden(False)
         self.dsb_several_phase_coefficient_h.setHidden(False)
         self.l_several_phase_count_iterations.setHidden(False)
         self.sb_several_phase_count_iterations.setHidden(False)
+
+    def _enable_regular_polygon(self) -> None:
+        """
+        Выбор построения правильной фигуры.
+        :return:
+        """
+        self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
+        self.l_single_phase_count_iterations.setHidden(False)
+        self.sb_single_phase_count_iterations.setHidden(False)
+        self.lb_regular_polygon_count_angle.setHidden(False)
+        self.sb_regular_polygon_count_angle.setHidden(False)
+        self.rb_regular_polygon_build_inside.setHidden(False)
+        self.rb_regular_polygon_build_outside.setHidden(False)
+        self.l_several_phase_coefficient_a.setHidden(True)
+        self.dsb_several_phase_coefficient_a.setHidden(True)
+        self.l_several_phase_coefficient_h.setHidden(True)
+        self.dsb_several_phase_coefficient_h.setHidden(True)
+        self.l_several_phase_count_iterations.setHidden(True)
+        self.sb_several_phase_count_iterations.setHidden(True)
 
     def _plot_graph_line_len(self) -> None:
         """

@@ -47,20 +47,20 @@ class Curve:
 
         self._active_segments.append(segment)
 
-    def _make_frame(self, corners_number: int, radius: float) -> None:
+    @staticmethod
+    def _make_frame(corners_number: int, side_length: float) -> List[Segment]:
         """
         Формирование карскаса правильной фигуры для дальнейшего модифицирования кривой Коха.
         :param corners_number: Количество углов правильной фигуры.
-        :param radius: Величина радиуса фигуры
-        :return:
+        :param side_length: Величина стороны фигуры.
+        :return: Список отрезков (замкнутный полигон фигуры).
         """
         # TODO:
-        points = [Point(radius * math.cos(2 * math.pi * i / corners_number) + CENTER.x,
-                        radius * math.sin(2 * math.pi * i / corners_number) + CENTER.y)
+        points = [Point(side_length / (2 * math.sin(math.pi / corners_number)) * math.cos(2 * math.pi * i / corners_number) + CENTER.x,
+                        side_length / (2 * math.sin(math.pi / corners_number)) * math.sin(2 * math.pi * i / corners_number) + CENTER.y)
                   for i in range(corners_number)]
 
-        self.lines = [Segment(points[i], points[i + 1]) for i in range(corners_number - 1)]
-        self._active_segments = deepcopy(self.lines)
+        return [Segment(points[i], points[i + 1]) for i in range(-1, corners_number - 1)]
 
     @staticmethod
     def _make_construction(max_iter: int, angle: float, max_length: float, start_length: float, point: Point,
@@ -244,6 +244,43 @@ class Curve:
                 engender_segment(active_segment, self._max_l_l / self._settings["count_iterations"])
             self.lines.append(deepcopy(self._stick_together(deepcopy(self._active_segments), CENTER)))
 
+    def _calculate_regular_polygon(self) -> None:
+        """
+
+        :return:
+        """
+        delta_a = self._max_l_l / self._settings["count_iterations"]
+        length = delta_a
+        for i in range(self._settings["count_iterations"]):
+            length += delta_a
+            self.lines.append(self._make_frame(self._settings["count_angles"], length))
+
+        if self._settings["building_way"] == "inside":
+            self._active_segments = self.lines[-1]
+        else:
+            self._active_segments = self.lines[-1][::-1]
+
+        if self._count_depth == 1:
+            return
+
+        for _ in range(self._count_depth - 1):
+            segments_phase = []
+
+            for active_segment in self._active_segments:
+                angle = active_segment.get_triangle_angle()
+                segments_phase.append(self._make_construction(
+                    self._settings["count_iterations"], self._angle, self._max_l_l, self._max_l_l / 2.0,
+                    active_segment.start, angle))
+
+            for iteration in range(self._settings["count_iterations"]):
+                union_segments = []
+                for segments in segments_phase:
+                    union_segments += segments[iteration]
+                self.lines.append(self._stick_together(union_segments, CENTER))
+
+            # Заносим в список активных отрезков последние вычисленные отрезки
+            self._active_segments = [segment for segments in segments_phase for segment in segments[-1]]
+
     def build(self):
         """
         Вычисление фратклаьной структуры.
@@ -253,5 +290,7 @@ class Curve:
             self._calculate_single_phase()
         elif self._settings["model"] == "several":
             self._calculate_several_phases()
+        elif self._settings["model"] == "regular_polygon":
+            self._calculate_regular_polygon()
         else:
             raise ValueError("Unknown model")
