@@ -10,7 +10,6 @@ from fractals.koch_curve import Curve
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 
-
 SCROLL_UP = 4
 SCROLL_DOWN = 5
 HEIGHT = 1000
@@ -238,7 +237,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
                            **settings)
         koch_curve.build()
 
-        t = [sum(line.len() for line in lines)for lines in koch_curve.lines]
+        t = [sum(line.len() for line in lines) for lines in koch_curve.lines]
         s = [i for i in range(len(koch_curve.lines))]
 
         fig, ax = plt.subplots()
@@ -275,6 +274,8 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         s = [phase for phase, lines in enumerate(koch_curve.lines) for _ in lines]
 
         ax.plot(s, t, 'o', ms=10, alpha=0.7, mfc='orange')
+        ax.set(xlabel='Количество фаз (ед.)', ylabel='Величина угла (градусы)',
+                title='Зависимость величин углов каждого из отрезков фрактала от количества фаз')
         ax.grid()
         plt.show()
 
@@ -304,13 +305,14 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         s = [i for i in range(len(koch_curve.lines))]
 
         fig, axs = plt.subplots(2, 1)
-        axs[0].plot(s, x, '-o', ms=5, alpha=0.7, mfc='orange')
-        axs[0].set_xlabel('time')
-        axs[0].set_ylabel('s1 and s2')
-        axs[0].grid(True)
-        axs[1].plot(s, y, '-o', ms=5, alpha=0.7, mfc='orange')
+        fig.suptitle('Зависимость масштаба фрактала от количества фаз', fontsize=12)
 
-        axs[1].set_ylabel('coherence')
+        axs[0].plot(s, x, '-o', ms=5, alpha=0.7, mfc='orange')
+        axs[0].set(xlabel='Количество фаз (ед.)', ylabel='Величина по оси абсцисс (ед.)')
+        axs[0].grid(True)
+
+        axs[1].plot(s, y, '-o', ms=5, alpha=0.7, mfc='orange')
+        axs[1].set(xlabel='Количество фаз (ед.)', ylabel='Величина по оси ординат (ед.)')
         axs[1].grid(True)
 
         fig.tight_layout()
