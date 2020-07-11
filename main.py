@@ -53,6 +53,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
         self.rb_several_phase.clicked.connect(self._enable_several_phases)
         self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
+        self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
         self.pb_graph_angle.clicked.connect(self._plot_graph_angle)
 
     def _engender_fractal(self):
@@ -238,6 +239,44 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
         ax.plot(s, t, 'o', ms=10, alpha=0.7, mfc='orange')
         ax.grid()
+        plt.show()
+
+    def _plot_graph_scale(self):
+        """
+
+        :return:
+        """
+        # TODO: refactoring
+        settings = dict()
+        if self.rb_single_phase.isChecked():
+            settings["model"] = "single"
+            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
+        else:
+            settings["model"] = "several"
+            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
+        koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                           **settings)
+        koch_curve.build()
+
+        x = [abs(max(max(line.start.x, line.finish.x) for line in lines) -
+                 min(min(line.start.x, line.finish.x) for line in lines)) for lines in koch_curve.lines]
+        y = [abs(max(max(line.start.y, line.finish.y) for line in lines) -
+                 min(min(line.start.y, line.finish.y) for line in lines)) for lines in koch_curve.lines]
+        s = [i for i in range(len(koch_curve.lines))]
+
+        fig, axs = plt.subplots(2, 1)
+        axs[0].plot(s, x, '-o', ms=5, alpha=0.7, mfc='orange')
+        axs[0].set_xlabel('time')
+        axs[0].set_ylabel('s1 and s2')
+        axs[0].grid(True)
+        axs[1].plot(s, y, '-o', ms=5, alpha=0.7, mfc='orange')
+
+        axs[1].set_ylabel('coherence')
+        axs[1].grid(True)
+
+        fig.tight_layout()
         plt.show()
 
     @staticmethod

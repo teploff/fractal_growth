@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>698</width>
-    <height>630</height>
+    <height>672</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -555,6 +555,24 @@
          </item>
          <item>
           <widget class="QPushButton" name="pb_graph_line_len">
+           <property name="text">
+            <string>Построить</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_17">
+         <item>
+          <widget class="QLabel" name="lb_graph_scale">
+           <property name="text">
+            <string>Масштаб фрактала от количества фаз</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pb_graph_scale">
            <property name="text">
             <string>Построить</string>
            </property>
