@@ -45,10 +45,12 @@ class Curve:
 
         self._active_segments.append(segment)
 
+    # TODO: to transfer to another model
     @staticmethod
-    def _make_frame(corners_n: int, side_length: float) -> List[Segment]:
+    def _make_frame(center: Point, corners_n: int, side_length: float) -> List[Segment]:
         """
         Формирование карскаса правильной фигуры для дальнейшего модифицирования кривой Коха.
+        :param center: Координата центральной, равноудаленной точки от заданных углов правильной фигуры.
         :param corners_n: Количество углов правильной фигуры.
         :param side_length: Величина стороны фигуры.
         :return: Список отрезков (замкнутный полигон фигуры).
@@ -56,8 +58,8 @@ class Curve:
         points = []
 
         for i in range(corners_n):
-            x = side_length / (2 * math.sin(math.pi / corners_n)) * math.cos(2 * math.pi * i / corners_n) + CENTER.x
-            y = side_length / (2 * math.sin(math.pi / corners_n)) * math.sin(2 * math.pi * i / corners_n) + CENTER.y
+            x = side_length / (2 * math.sin(math.pi / corners_n)) * math.cos(2 * math.pi * i / corners_n) + center.x
+            y = side_length / (2 * math.sin(math.pi / corners_n)) * math.sin(2 * math.pi * i / corners_n) + center.y
             points.append(Point(x, y))
 
         return [Segment(points[i], points[i + 1]) for i in range(-1, corners_n - 1)]
@@ -252,7 +254,7 @@ class Curve:
         length = delta_a
         for i in range(self._settings["count_iterations"]):
             length += delta_a
-            self.lines.append(self._make_frame(self._settings["count_angles"], length))
+            self.lines.append(self._make_frame(CENTER, self._settings["count_angles"], length))
 
         if self._settings["building_way"] == "inside":
             self._active_segments = self.lines[-1]
