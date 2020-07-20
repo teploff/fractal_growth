@@ -229,7 +229,7 @@ class Curve:
                 grown_up_segments_exists = False
                 for index, active_segment in enumerate(self._active_segments):
                     if math.isclose(active_segment.len(), self._max_l_l,
-                                    abs_tol=self._max_l_l/self._settings["count_iterations"]):
+                                    abs_tol=0.001):
                         exist = True
                         grown_up_segments_exists = True
                         curr_angle = active_segment.get_triangle_angle()
