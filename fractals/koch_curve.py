@@ -2,7 +2,7 @@ from copy import deepcopy
 import math
 from typing import List
 
-from fractals.const import CENTER
+from fractals.const import ACCURACY, CENTER
 from geometry.entity_2d import Segment, Point
 from ontogeny.utils import engender_segment
 
@@ -20,7 +20,6 @@ class Curve:
         :param angle: Угол равнобередренного треугольника в градусах.
         :param settings: Дополнительные настройки.
         """
-
         self._count_depth = count_depth
         self._max_l_l = line_len
         self._angle = angle
@@ -35,7 +34,6 @@ class Curve:
         :param count_iterations: Количество итераций роста.
         :return:
         """
-
         segment = Segment(Point(CENTER.x - 0.001, CENTER.y), Point(CENTER.x + 0.001, CENTER.y))
         self.lines.append([segment])
 
@@ -48,19 +46,21 @@ class Curve:
         self._active_segments.append(segment)
 
     @staticmethod
-    def _make_frame(corners_number: int, side_length: float) -> List[Segment]:
+    def _make_frame(corners_n: int, side_length: float) -> List[Segment]:
         """
         Формирование карскаса правильной фигуры для дальнейшего модифицирования кривой Коха.
-        :param corners_number: Количество углов правильной фигуры.
+        :param corners_n: Количество углов правильной фигуры.
         :param side_length: Величина стороны фигуры.
         :return: Список отрезков (замкнутный полигон фигуры).
         """
-        # TODO:
-        points = [Point(side_length / (2 * math.sin(math.pi / corners_number)) * math.cos(2 * math.pi * i / corners_number) + CENTER.x,
-                        side_length / (2 * math.sin(math.pi / corners_number)) * math.sin(2 * math.pi * i / corners_number) + CENTER.y)
-                  for i in range(corners_number)]
+        points = []
 
-        return [Segment(points[i], points[i + 1]) for i in range(-1, corners_number - 1)]
+        for i in range(corners_n):
+            x = side_length / (2 * math.sin(math.pi / corners_n)) * math.cos(2 * math.pi * i / corners_n) + CENTER.x
+            y = side_length / (2 * math.sin(math.pi / corners_n)) * math.sin(2 * math.pi * i / corners_n) + CENTER.y
+            points.append(Point(x, y))
+
+        return [Segment(points[i], points[i + 1]) for i in range(-1, corners_n - 1)]
 
     @staticmethod
     def _make_construction(max_iter: int, angle: float, max_length: float, start_length: float, point: Point,
@@ -228,8 +228,7 @@ class Curve:
             while grown_up_segments_exists:
                 grown_up_segments_exists = False
                 for index, active_segment in enumerate(self._active_segments):
-                    if math.isclose(active_segment.len(), self._max_l_l,
-                                    abs_tol=0.001):
+                    if math.isclose(active_segment.len(), self._max_l_l, abs_tol=ACCURACY):
                         exist = True
                         grown_up_segments_exists = True
                         curr_angle = active_segment.get_triangle_angle()
