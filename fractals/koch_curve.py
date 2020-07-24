@@ -194,22 +194,18 @@ class Curve:
             return
 
         for _ in range(self._count_depth - 1):
-            segments_phase = []
-
-            for active_segment in self._active_segments:
-                angle = active_segment.get_triangle_angle()
-                segments_phase.append(self._make_construction(
-                    self._settings["count_iterations"], self._angle, self._max_l_l, self._max_l_l / 2.0,
-                    active_segment.start, angle))
-
+            length = self._max_l_l / 2.0
+            delta_length = (self._max_l_l - self._max_l_l / 2.0) / self._settings["count_iterations"]
             for iteration in range(self._settings["count_iterations"]):
-                union_segments = []
-                for segments in segments_phase:
-                    union_segments += segments[iteration]
-                self.lines.append(self._stick_together(union_segments, CENTER))
+                segments_phase = []
+                length += delta_length
+                for active_segment in self._active_segments:
+                    angle = active_segment.get_triangle_angle()
+                    height = ((iteration + 1) / self._settings["count_iterations"]) * self._max_l_l * math.sin(self._angle * math.pi / 180.0)
+                    segments_phase += self._make_temp_construction(height, length, active_segment.start, angle, self._angle)
+                self.lines.append(self._stick_together(segments_phase, CENTER))
 
-            # Заносим в список активных отрезков последние вычисленные отрезки
-            self._active_segments = [segment for segments in segments_phase for segment in segments[-1]]
+            self._active_segments = self.lines[-1]
 
     def _calculate_several_phases(self) -> None:
         """
