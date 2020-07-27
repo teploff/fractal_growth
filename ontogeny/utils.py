@@ -39,7 +39,7 @@ def divide_into_two_equal_parts(p1, p2):
     return p1, (x, y), p2
 
 
-def engender_segment(segment: Segment, length: float) -> None:
+def increase_segment_length(segment: Segment, length: float) -> None:
     """
     Увеличить длину отрезка segment на величину length.
     :param segment: Исходный отрезок

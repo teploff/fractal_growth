@@ -6,7 +6,7 @@ import design  # Это наш конвертированный файл диз�
 from OpenGL.GL import *
 # from OpenGL.GLU import *
 from geometry.entity_2d import Segment
-from fractals.koch_curve import Curve
+from fractals.koch.curve import Curve
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 
