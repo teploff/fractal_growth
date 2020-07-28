@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>840</width>
-    <height>614</height>
+    <height>648</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_7">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_21">
+     <layout class="QHBoxLayout" name="horizontalLayout_9">
       <item>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
@@ -435,6 +435,13 @@
            </item>
           </layout>
          </item>
+         <item>
+          <widget class="QPushButton" name="pb_calculate_fractal">
+           <property name="text">
+            <string>Вычислить</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -580,9 +587,9 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
-              <widget class="QPushButton" name="pb_engender_fractal">
+              <widget class="QPushButton" name="pb_visualize">
                <property name="text">
-                <string>Фрактал</string>
+                <string>Визуализировать</string>
                </property>
               </widget>
              </item>

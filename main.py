@@ -2,7 +2,7 @@ from typing import List, Tuple
 import pygame
 import sys  # sys нужен для передачи argv в QApplication
 from PyQt5 import QtWidgets, QtGui
-import design  # Это наш конвертированный файл дизайна
+from ui.design import Ui_MainWindow
 from OpenGL.GL import *
 # from OpenGL.GLU import *
 from geometry.entity_2d import Segment
@@ -25,13 +25,15 @@ WHITE = (1.0, 1.0, 1.0)
 DIRECTORY = './pictures/'
 
 
-class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
+class Application(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         # initialize components from generated design.py
         super().__init__()
         self.setupUi(self)
 
         # make default settings
+        self.koch_curve = None
+        self.error_dialog = QtWidgets.QErrorMessage()
         self.rgb_lines = BLACK
         self.rgb_background = WHITE
         self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
@@ -49,7 +51,8 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         pygame.init()
 
         # callbacks
-        self.pb_engender_fractal.clicked.connect(self._engender_fractal)
+        self.pb_calculate_fractal.clicked.connect(self._calculation_fractal)
+        self.pb_visualize.clicked.connect(self._visualize_fractal)
         self.pb_build_point_path.clicked.connect(self._point_growth_path)
         self.pb_line_color.clicked.connect(self._pick_lines_color)
         self.pb_background_color.clicked.connect(self._pick_background_color)
@@ -60,13 +63,11 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
         self.pb_graph_angle.clicked.connect(self._plot_graph_angle)
 
-    def _engender_fractal(self):
+    def _calculation_fractal(self):
         """
-        Наростить фрактал.
+        Вычислить фрактальную структуру.
         :return:
         """
-        pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
-
         settings = dict()
         if self.rb_single_phase.isChecked():
             settings["model"] = "single"
@@ -82,14 +83,40 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
             settings["count_angles"] = self.sb_regular_polygon_count_angle.value()
             settings["building_way"] = "inside" if self.rb_regular_polygon_build_inside.isChecked() else "outside"
 
-        koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                           **settings)
-        koch_curve.build()
+        self.koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                                **settings)
+        self.koch_curve.build()
+
+    def _is_calculations_absent(self):
+        """
+        Вычисления фрактальной структуры отсутствуют?
+        :return:
+        """
+        if self.koch_curve is None:
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Critical)
+            msg.setText('Ошибка')
+            msg.setInformativeText('Вычисления отсутсвуют. Необходимо вычислить фрактал!')
+            msg.setWindowTitle('Error')
+            msg.exec_()
+            return True
+        return False
+
+    def _visualize_fractal(self):
+        """
+        Визуализировать вычисленную фрактальную структуру.
+        :return:
+        """
+
+        if self._is_calculations_absent():
+            return
+
+        pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
 
         index = 0
         quit_mode = False
         while not quit_mode:
-            self.draw(koch_curve.lines[index % len(koch_curve.lines)], self.rgb_lines, self.rgb_background,
+            self.draw(self.koch_curve.lines[index % len(self.koch_curve.lines)], self.rgb_lines, self.rgb_background,
                       self.sb_draw_latency.value())
             # TODO: make save image
             # self.save_image(DIRECTORY, str(index) + '.png')
@@ -110,6 +137,7 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
         Построить траекторию роста точек фрактала
         :return:
         """
+        # TODO: legacy. It doesn't work. Fix it.
         # Инициализация белого окна
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
         quit_mode = False
@@ -223,22 +251,11 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
         :return:
         """
-        # TODO: refactoring
-        settings = dict()
-        if self.rb_single_phase.isChecked():
-            settings["model"] = "single"
-            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
-        else:
-            settings["model"] = "several"
-            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
-        koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                           **settings)
-        koch_curve.build()
+        if self._is_calculations_absent():
+            return
 
-        t = [sum(line.len() for line in lines) for lines in koch_curve.lines]
-        s = [i for i in range(len(koch_curve.lines))]
+        t = [sum(line.len() for line in lines) for lines in self.koch_curve.lines]
+        s = [i for i in range(len(self.koch_curve.lines))]
 
         fig, ax = plt.subplots()
         ax.plot(s, t)
@@ -254,28 +271,17 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
         :return:
         """
-        # TODO: refactoring
-        settings = dict()
-        if self.rb_single_phase.isChecked():
-            settings["model"] = "single"
-            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
-        else:
-            settings["model"] = "several"
-            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
-        koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                           **settings)
-        koch_curve.build()
+        if self._is_calculations_absent():
+            return
 
         fig, ax = plt.subplots()
 
-        t = [line.get_triangle_angle() for lines in koch_curve.lines for line in lines]
-        s = [phase for phase, lines in enumerate(koch_curve.lines) for _ in lines]
+        t = [line.get_triangle_angle() for lines in self.koch_curve.lines for line in lines]
+        s = [phase for phase, lines in enumerate(self.koch_curve.lines) for _ in lines]
 
         ax.plot(s, t, 'o', ms=10, alpha=0.7, mfc='orange')
         ax.set(xlabel='Количество фаз (ед.)', ylabel='Величина угла (градусы)',
-                title='Зависимость величин углов каждого из отрезков фрактала от количества фаз')
+               title='Зависимость величин углов каждого из отрезков фрактала от количества фаз')
         ax.grid()
         plt.show()
 
@@ -284,25 +290,14 @@ class Application(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
         :return:
         """
-        # TODO: refactoring
-        settings = dict()
-        if self.rb_single_phase.isChecked():
-            settings["model"] = "single"
-            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
-        else:
-            settings["model"] = "several"
-            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
-        koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                           **settings)
-        koch_curve.build()
+        if self._is_calculations_absent():
+            return
 
         x = [abs(max(max(line.start.x, line.finish.x) for line in lines) -
-                 min(min(line.start.x, line.finish.x) for line in lines)) for lines in koch_curve.lines]
+                 min(min(line.start.x, line.finish.x) for line in lines)) for lines in self.koch_curve.lines]
         y = [abs(max(max(line.start.y, line.finish.y) for line in lines) -
-                 min(min(line.start.y, line.finish.y) for line in lines)) for lines in koch_curve.lines]
-        s = [i for i in range(len(koch_curve.lines))]
+                 min(min(line.start.y, line.finish.y) for line in lines)) for lines in self.koch_curve.lines]
+        s = [i for i in range(len(self.koch_curve.lines))]
 
         fig, axs = plt.subplots(2, 1)
         fig.suptitle('Зависимость масштаба фрактала от количества фаз', fontsize=12)

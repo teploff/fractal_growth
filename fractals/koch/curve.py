@@ -34,10 +34,10 @@ class Curve:
         Вычисление фаз фрактальной структуры.
         :return:
         """
-        length = self._max_l_l / 2.0
-        delta_length = (self._max_l_l - self._max_l_l / 2.0) / self._settings["count_iterations"]
-
+        start_length = self._max_l_l / 2.0
         for _ in range(self._count_depth - 1):
+            length = start_length
+            delta_length = (self._max_l_l - start_length) / self._settings["count_iterations"]
             for iteration in range(self._settings["count_iterations"]):
                 segments_phase = []
                 length += delta_length
