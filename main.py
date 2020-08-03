@@ -119,7 +119,8 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
             self.draw(self.koch_curve.lines[index % len(self.koch_curve.lines)], self.rgb_lines, self.rgb_background,
                       self.sb_draw_latency.value())
             # TODO: make save image
-            # self.save_image(DIRECTORY, str(index) + '.png')
+            if index != 0 and index < len(self.koch_curve.lines):
+                self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -341,16 +342,26 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
     @staticmethod
     def save_image(directory: str, file_name: str) -> None:
         """
-        Сохранение текущего состояния канваса OpenGL в виде PNG файла на диск.
+        Сохранение текущего состояния канваса OpenGL в виде PNG файла на диск с прозрачным фон прозрачным, заменив
+        при этом все белые пиксели.
         :param directory: Полный или относительный путь дирректории, куда будет производиться сохранение.
         :param file_name: Наименование файла.
         :return:
         """
         glPixelStorei(GL_PACK_ALIGNMENT, 1)
 
-        data = glReadPixels(0, 0, WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE)
-        image = Image.frombytes("RGBA", (WIDTH, HEIGHT), data)
+        rough_data = glReadPixels(0, 0, WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE)
+        image = Image.frombytes("RGBA", (WIDTH, HEIGHT), rough_data)
         image = ImageOps.flip(image)  # in my case image is flipped top-bottom for some reason
+        data = image.getdata()
+        new_data = []
+        for item in data:
+            if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                new_data.append((255, 255, 255, 0))
+            else:
+                new_data.append(item)
+        image.putdata(new_data)
+
         image.save(directory + file_name, 'PNG')
 
 
