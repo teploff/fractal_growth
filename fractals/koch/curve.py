@@ -1,4 +1,5 @@
 from copy import deepcopy
+from shapely.geometry import Polygon
 import math
 
 from fractals.koch.const import ACCURACY, CENTER
@@ -46,7 +47,23 @@ class Curve:
                     angle = active_segment.get_triangle_angle()
                     height = ((iteration + 1) / self._settings["count_iterations"]) * self._max_l_l * math.sin(self._angle * math.pi / 180.0)
                     segments_phase += calc_base_struct(height, length, active_segment.start, angle, self._angle)
-                self.lines.append(stick_segments(segments_phase, CENTER))
+                lines = stick_segments(segments_phase, CENTER)
+                # TODO: thinking about sticking
+                points = []
+                for line in lines:
+                    points.append([line.start.x, line.start.y])
+                    points.append([line.finish.x, line.finish.y])
+                p = Polygon(points)
+                center = p.centroid
+                d_x = CENTER.x - center.x
+                d_y = CENTER.y - center.y
+                for line in lines:
+                    line.start.x += d_x
+                    line.start.y += d_y
+                    line.finish.x += d_x
+                    line.finish.y += d_y
+
+                self.lines.append(lines)
 
             self._active_segments = self.lines[-1]
 

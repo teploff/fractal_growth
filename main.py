@@ -52,8 +52,8 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # callbacks
         self.pb_calculate_fractal.clicked.connect(self._calculation_fractal)
-        self.pb_visualize.clicked.connect(self._visualize_fractal)
-        self.pb_build_point_path.clicked.connect(self._point_growth_path)
+        self.pb_visualize.clicked.connect(self._visualize_fractal_growth)
+        self.pb_build_point_path.clicked.connect(self._visualize_point_path_growth)
         self.pb_line_color.clicked.connect(self._pick_lines_color)
         self.pb_background_color.clicked.connect(self._pick_background_color)
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
@@ -102,12 +102,13 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
             return True
         return False
 
-    def _visualize_fractal(self):
+    def _visualize_fractal_growth(self):
         """
         Визуализировать вычисленную фрактальную структуру.
         :return:
         """
 
+        # TODO: make decorator
         if self._is_calculations_absent():
             return
 
@@ -133,33 +134,24 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
 
             index += 1
 
-    def _point_growth_path(self):
+    def _visualize_point_path_growth(self):
         """
-        Построить траекторию роста точек фрактала
+        Визуализировать траекторию точек роста вычисленной фрактальной структуры.
         :return:
         """
-        # TODO: legacy. It doesn't work. Fix it.
-        # Инициализация белого окна
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
+
+        index = 0
         quit_mode = False
-        koch_curve = Curve(self.dsb_max_line_legth.value(), N_ITER)
-        koch_curve.build(self.sb_fractal_depth.value())
-
         while not quit_mode:
-            new_lines = []
-            i = 0
-            while i < len(koch_curve.lines) - 2:
-                lll = []
-                for j in range(i + 1):
-                    lll.append(Segment(koch_curve.lines[j][0].start, koch_curve.lines[j + 1][0].start))
-                    lll.append(Segment(koch_curve.lines[j][len(koch_curve.lines[j]) - 1].finish,
-                                       koch_curve.lines[j + 1][len(koch_curve.lines[j + 1]) - 1].finish))
-                new_lines.append(lll)
-                i += 1
+            a = []
+            for i in range(index % len(self.koch_curve.lines)):
+                a += self.koch_curve.lines[i]
+            self.draw_points(a, self.rgb_lines, self.rgb_background, self.sb_draw_latency.value())
 
-            for i, lines in enumerate(new_lines):
-                self.draw(lines, BLACK, WHITE)
-                self.save_image(DIRECTORY, str(i) + '.png')
+            # TODO: make save image
+            if index != 0 and index < len(self.koch_curve.lines):
+                self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -169,6 +161,8 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit()
                         quit_mode = True
+
+            index += 1
 
     def _pick_lines_color(self) -> None:
         """
@@ -247,14 +241,17 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.l_several_phase_count_iterations.setHidden(True)
         self.sb_several_phase_count_iterations.setHidden(True)
 
+    # TODO: approximation
     def _plot_graph_line_len(self) -> None:
         """
-
+        # TODO: docstring
         :return:
         """
+        # TODO: make decorator
         if self._is_calculations_absent():
             return
 
+        # TODO: to name this shirt
         t = [sum(line.len() for line in lines) for lines in self.koch_curve.lines]
         s = [i for i in range(len(self.koch_curve.lines))]
 
@@ -269,14 +266,15 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def _plot_graph_angle(self):
         """
-
+        # TODO: docstring
         :return:
         """
+        # TODO: make decorator
         if self._is_calculations_absent():
             return
 
         fig, ax = plt.subplots()
-
+        # TODO: to name this shirt
         t = [line.get_triangle_angle() for lines in self.koch_curve.lines for line in lines]
         s = [phase for phase, lines in enumerate(self.koch_curve.lines) for _ in lines]
 
@@ -286,14 +284,17 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.grid()
         plt.show()
 
+    # TODO: approximation
     def _plot_graph_scale(self):
         """
-
+        # TODO: docstring
         :return:
         """
+        # TODO: make decorator
         if self._is_calculations_absent():
             return
 
+        # TODO: to name this shirt
         x = [abs(max(max(line.start.x, line.finish.x) for line in lines) -
                  min(min(line.start.x, line.finish.x) for line in lines)) for lines in self.koch_curve.lines]
         y = [abs(max(max(line.start.y, line.finish.y) for line in lines) -
@@ -315,6 +316,8 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         plt.show()
 
     @staticmethod
+    # TODO: make common method with draw points
+    # TODO: move to another package
     def draw(lines: List[Segment], rgb_lines: Tuple[float, float, float], rgb_background: Tuple[float, float, float],
              draw_latency: int) -> None:
         """
@@ -340,10 +343,40 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         pygame.time.wait(draw_latency)
 
     @staticmethod
+    # TODO: make common method with draw lines
+    # TODO: move to another package
+    def draw_points(lines: List[Segment], rgb_lines: Tuple[float, float, float],
+                    rgb_background: Tuple[float, float, float], draw_latency: int) -> None:
+        """
+        Прорисовка на канвасе OpenGL.
+        :param lines: Список отрезков, которые необходимо отобразить.
+        :param rgb_lines: RGB пера, которым будут отрисованы отрезки.
+        :param rgb_background: RGB фона.
+        :param draw_latency: задержка при отрисовке.
+        :return:
+        """
+        glColor3f(*rgb_lines)
+        glPointSize(2)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glClearColor(*rgb_background, 1)
+
+        glBegin(GL_POINTS)
+        for line in lines:
+            glVertex2f(line.start.x, line.start.y)
+            glVertex2f(line.finish.x, line.finish.y)
+        glEnd()
+
+        pygame.display.flip()
+        pygame.time.wait(draw_latency)
+
+    @staticmethod
+    # TODO: make full file path
+    # TODO: choose color to transparency
+    # TODO: move to another package
     def save_image(directory: str, file_name: str) -> None:
         """
-        Сохранение текущего состояния канваса OpenGL в виде PNG файла на диск с прозрачным фон прозрачным, заменив
-        при этом все белые пиксели.
+        Сохранение текущего состояния канваса OpenGL в виде PNG файла на диск с прозрачным фоном, заменив при этом все
+        белые пиксели.
         :param directory: Полный или относительный путь дирректории, куда будет производиться сохранение.
         :param file_name: Наименование файла.
         :return:
