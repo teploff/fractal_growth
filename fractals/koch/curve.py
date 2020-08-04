@@ -48,6 +48,7 @@ class Curve:
                     height = ((iteration + 1) / self._settings["count_iterations"]) * self._max_l_l * math.sin(self._angle * math.pi / 180.0)
                     segments_phase += calc_base_struct(height, length, active_segment.start, angle, self._angle)
                 lines = stick_segments(segments_phase, CENTER)
+
                 # TODO: thinking about sticking
                 points = []
                 for line in lines:
