@@ -126,8 +126,8 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
             self.draw(self.koch_curve.lines[index % len(self.koch_curve.lines)], self.rgb_lines, self.rgb_background,
                       self.sb_draw_latency.value())
             # # TODO: make save image
-            # if index != 0 and index < len(self.koch_curve.lines):
-            #     self.save_image(DIRECTORY, str(index) + '.png')
+            if index != 0 and index < len(self.koch_curve.lines):
+                self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

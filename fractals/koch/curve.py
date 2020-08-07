@@ -122,7 +122,51 @@ class Curve:
 
         :return:
         """
-        pass
+        self.lines = calc_segment_phases(CENTER, self._settings["count_iterations"], self._max_l_l)
+        self._active_segments = deepcopy(self.lines[-1])
+
+        for segment in self._active_segments:
+            segment.depth = 1
+            segment.possible = True
+
+        possible = True
+
+        if self._count_depth == 1:
+            return
+
+        length = self._settings["coefficient_a"] * self._max_l_l
+        height = self._settings["coefficient_h"] * self._max_l_l
+
+        while possible:
+            grown_up_segments_exists = True
+            exist = False
+            while grown_up_segments_exists:
+                grown_up_segments_exists = False
+                for index, active_segment in enumerate(self._active_segments):
+                    if math.isclose(active_segment.len(), self._max_l_l, abs_tol=ACCURACY) and active_segment.possible:
+                        if active_segment.depth == self._count_depth:
+                            active_segment.possible = False
+                        else:
+                            exist = True
+                            grown_up_segments_exists = True
+                            curr_angle = active_segment.get_triangle_angle()
+                            segments = calc_base_struct(height, length, active_segment.start, curr_angle, self._angle)
+                            next_depth = active_segment.depth + 1
+                            for segment in segments:
+                                segment.depth = next_depth
+                                segment.possible = True
+
+                            self._active_segments[index:index + 1] = segments
+                            break
+
+            if exist:
+                self.lines.append(deepcopy(stick_segments(deepcopy(self._active_segments), CENTER)))
+
+            for active_segment in self._active_segments:
+                if active_segment.possible:
+                    increase_segment_length(active_segment, self._max_l_l / self._settings["count_iterations"])
+            possible = any(active_segment.possible for active_segment in self._active_segments)
+            self.lines.append(deepcopy(stick_segments(deepcopy(self._active_segments), CENTER)))
 
     def _calculate_regular_polygon(self) -> None:
         """
