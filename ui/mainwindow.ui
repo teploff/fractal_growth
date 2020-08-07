@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>840</width>
-    <height>648</height>
+    <width>957</width>
+    <height>718</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -569,9 +569,16 @@
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="rb_several_phase">
+              <widget class="QRadioButton" name="rb_several_phases">
                <property name="text">
                 <string>Многофазная</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="rb_irregular_phases">
+               <property name="text">
+                <string>Нерегулярная</string>
                </property>
               </widget>
              </item>
@@ -679,7 +686,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>840</width>
+     <width>957</width>
      <height>22</height>
     </rect>
    </property>

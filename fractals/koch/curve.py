@@ -117,6 +117,13 @@ class Curve:
                 increase_segment_length(active_segment, self._max_l_l / self._settings["count_iterations"])
             self.lines.append(deepcopy(stick_segments(deepcopy(self._active_segments), CENTER)))
 
+    def _calculate_irregular_phases(self) -> None:
+        """
+
+        :return:
+        """
+        pass
+
     def _calculate_regular_polygon(self) -> None:
         """
         Вычисление однофазной фрактальной структуры на основе правильной фигуры.
@@ -147,6 +154,8 @@ class Curve:
             self._calculate_single_phase()
         elif self._settings["model"] == "several":
             self._calculate_several_phases()
+        elif self._settings["model"] == "irregular":
+            self._calculate_irregular_phases()
         elif self._settings["model"] == "regular_polygon":
             self._calculate_regular_polygon()
         else:

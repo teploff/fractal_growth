@@ -57,7 +57,8 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pb_line_color.clicked.connect(self._pick_lines_color)
         self.pb_background_color.clicked.connect(self._pick_background_color)
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
-        self.rb_several_phase.clicked.connect(self._enable_several_phases)
+        self.rb_several_phases.clicked.connect(self._enable_several_phases)
+        self.rb_irregular_phases.clicked.connect(self._irregular_several_phases)
         self.rb_regular_polygon.clicked.connect(self._enable_regular_polygon)
         self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
         self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
@@ -72,8 +73,13 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.rb_single_phase.isChecked():
             settings["model"] = "single"
             settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
-        elif self.rb_several_phase.isChecked():
+        elif self.rb_several_phases.isChecked():
             settings["model"] = "several"
+            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
+        elif self.rb_irregular_phases.isChecked():
+            settings["model"] = "irregular"
             settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
             settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
             settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
@@ -119,9 +125,9 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         while not quit_mode:
             self.draw(self.koch_curve.lines[index % len(self.koch_curve.lines)], self.rgb_lines, self.rgb_background,
                       self.sb_draw_latency.value())
-            # TODO: make save image
-            if index != 0 and index < len(self.koch_curve.lines):
-                self.save_image(DIRECTORY, str(index) + '.png')
+            # # TODO: make save image
+            # if index != 0 and index < len(self.koch_curve.lines):
+            #     self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -149,9 +155,9 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
                 a += self.koch_curve.lines[i]
             self.draw_points(a, self.rgb_lines, self.rgb_background, self.sb_draw_latency.value())
 
-            # TODO: make save image
-            if index != 0 and index < len(self.koch_curve.lines):
-                self.save_image(DIRECTORY, str(index) + '.png')
+            # # TODO: make save image
+            # if index != 0 and index < len(self.koch_curve.lines):
+            #     self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -221,6 +227,25 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dsb_several_phase_coefficient_h.setHidden(False)
         self.l_several_phase_count_iterations.setHidden(False)
         self.sb_several_phase_count_iterations.setHidden(False)
+
+    def _irregular_several_phases(self) -> None:
+        """
+        Выбор построения нерегулярной модели.
+        :return:
+        """
+        self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
+        self.l_single_phase_count_iterations.setHidden(False)
+        self.sb_single_phase_count_iterations.setHidden(False)
+        self.lb_regular_polygon_count_angle.setHidden(True)
+        self.sb_regular_polygon_count_angle.setHidden(True)
+        self.rb_regular_polygon_build_inside.setHidden(True)
+        self.rb_regular_polygon_build_outside.setHidden(True)
+        self.l_several_phase_coefficient_a.setHidden(False)
+        self.dsb_several_phase_coefficient_a.setHidden(False)
+        self.l_several_phase_coefficient_h.setHidden(False)
+        self.dsb_several_phase_coefficient_h.setHidden(False)
+        self.l_several_phase_count_iterations.setHidden(True)
+        self.sb_several_phase_count_iterations.setHidden(True)
 
     def _enable_regular_polygon(self) -> None:
         """
