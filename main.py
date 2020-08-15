@@ -54,6 +54,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pb_calculate_fractal.clicked.connect(self._calculation_fractal)
         self.pb_visualize.clicked.connect(self._visualize_fractal_growth)
         self.pb_build_point_path.clicked.connect(self._visualize_point_path_growth)
+        self.pb_thin_out.clicked.connect(self._visualize_thin_out_fractal_growth)
         self.pb_line_color.clicked.connect(self._pick_lines_color)
         self.pb_background_color.clicked.connect(self._pick_background_color)
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
@@ -158,6 +159,50 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
             # # TODO: make save image
             # if index != 0 and index < len(self.koch_curve.lines):
             #     self.save_image(DIRECTORY, str(index) + '.png')
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit_mode = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        quit_mode = True
+
+            index += 1
+
+    def _visualize_thin_out_fractal_growth(self) -> None:
+        """
+        Прорядить фазы построения фрактальной структуры.
+        :return:
+        """
+        # TODO: make decorator
+        if self._is_calculations_absent():
+            return
+
+        pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
+
+        index = 0
+        quit_mode = False
+        lines = []
+
+        # TODO: move to separate module
+        if self.sb_thinning_percentage.value() > 0:
+            percent = self.sb_thinning_percentage.value() * 0.01
+            kz = len(self.koch_curve.lines) * percent
+            kio = int(len(self.koch_curve.lines) / kz)
+            lyly = [i for i in range(0, len(self.koch_curve.lines), kio)]
+            lines = [lines for index, lines in enumerate(self.koch_curve.lines) if index % 40 == 0]
+
+        while not quit_mode:
+            a = []
+            for i in range(index % len(lines)):
+                a += lines[i]
+            self.draw(a, self.rgb_lines, self.rgb_background, self.sb_draw_latency.value())
+
+            # TODO: make save image
+            if index != 0 and index < len(self.koch_curve.lines):
+                self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
