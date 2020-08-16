@@ -9,6 +9,7 @@ from geometry.entity_2d import Segment
 from fractals.koch.curve import Curve
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
+import scipy
 
 SCROLL_UP = 4
 SCROLL_DOWN = 5
@@ -156,9 +157,9 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
                 a += self.koch_curve.lines[i]
             self.draw_points(a, self.rgb_lines, self.rgb_background, self.sb_draw_latency.value())
 
-            # # TODO: make save image
-            # if index != 0 and index < len(self.koch_curve.lines):
-            #     self.save_image(DIRECTORY, str(index) + '.png')
+            # TODO: make save image
+            if index != 0 and index < len(self.koch_curve.lines):
+                self.save_image(DIRECTORY, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -325,14 +326,85 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         t = [sum(line.len() for line in lines) for lines in self.koch_curve.lines]
         s = [i for i in range(len(self.koch_curve.lines))]
 
-        fig, ax = plt.subplots()
-        ax.plot(s, t)
+        # TODO: wtf
+        def mnkGP(x, y):
+            d = 4  # степень полинома
+            fp, residuals, rank, sv, rcond = scipy.polyfit(x, y, d, full=True)  # Модель
+            f = scipy.poly1d(fp)  # аппроксимирующая функция
+            print('Коэффициент -- a %s  ' % round(fp[0], 4))
+            print('Коэффициент-- b %s  ' % round(fp[1], 4))
+            print('Коэффициент -- c %s  ' % round(fp[2], 4))
+            y1 = [fp[0] * x[i] ** 2 + fp[1] * x[i] + fp[2] for i in range(0, len(x))]  # значения функции a*x**2+b*x+c
+            so = round(sum([abs(y[i] - y1[i]) for i in range(0, len(x))]) / (len(x) * sum(y)) * 100,
+                       4)  # средняя ошибка
+            print('Average quadratic deviation ' + str(so))
+            fx = scipy.linspace(x[0], x[-1] + 1, len(x))  # можно установить вместо len(x) большее число для интерполяции
+            fig, ax = plt.subplots()
+            ax.plot(x, y, 'o', label='Original data', markersize=1)
+            ax.plot(fx, f(fx), linewidth=2)
+            ax.set(xlabel='Количество фаз (ед.)', ylabel='Длина фрактала (ед.)',
+                   title='Зависимость длины фрактала от количества фаз')
+            ax.grid(True)
+            plt.show()
+        # https://habr.com/ru/post/322954/
+        mnkGP(s, t)
 
-        ax.set(xlabel='Количество фаз (ед.)', ylabel='Длина фрактала (ед.)',
-               title='Зависимость длины фрактала от количества фаз')
-        ax.grid()
+    # TODO: approximation
+    def _plot_graph_scale(self):
+        """
+        # TODO: docstring
+        :return:
+        """
+        # TODO: make decorator
+        if self._is_calculations_absent():
+            return
 
-        plt.show()
+        # TODO: to name this shirt
+        x = [abs(max(max(line.start.x, line.finish.x) for line in lines) -
+                 min(min(line.start.x, line.finish.x) for line in lines)) for lines in self.koch_curve.lines]
+        y = [abs(max(max(line.start.y, line.finish.y) for line in lines) -
+                 min(min(line.start.y, line.finish.y) for line in lines)) for lines in self.koch_curve.lines]
+        s = [i for i in range(len(self.koch_curve.lines))]
+
+        # TODO: wtf
+        def mnkGP(x, y1, y2):
+            d = 4  # степень полинома
+            fp1, residuals1, rank1, sv1, rcond1 = scipy.polyfit(x, y1, d, full=True)  # Модель
+            fp2, residuals2, rank2, sv2, rcond2 = scipy.polyfit(x, y2, d, full=True)  # Модель
+            f1 = scipy.poly1d(fp1)  # аппроксимирующая функция
+            f2 = scipy.poly1d(fp2)  # аппроксимирующая функция
+            print('Коэффициент -- a %s  ' % round(fp1[0], 4))
+            print('Коэффициент -- a %s  ' % round(fp2[0], 4))
+            print('Коэффициент-- b %s  ' % round(fp1[1], 4))
+            print('Коэффициент-- b %s  ' % round(fp2[1], 4))
+            print('Коэффициент -- c %s  ' % round(fp1[2], 4))
+            print('Коэффициент -- c %s  ' % round(fp2[2], 4))
+            y_1 = [f1[0] * x[i] ** 2 + fp1[1] * x[i] + fp1[2] for i in range(0, len(x))]  # значения функции a*x**2+b*x+c
+            y_2 = [f2[0] * x[i] ** 2 + fp2[1] * x[i] + fp2[2] for i in range(0, len(x))]  # значения функции a*x**2+b*x+c
+            so1 = round(sum([abs(y1[i] - y_1[i]) for i in range(0, len(x))]) / (len(x) * sum(y1)) * 100, 4)  # средняя ошибка
+            so2 = round(sum([abs(y2[i] - y_2[i]) for i in range(0, len(x))]) / (len(x) * sum(y2)) * 100, 4)  # средняя ошибка
+            print('Average quadratic deviation ' + str(so1))
+            print('Average quadratic deviation ' + str(so2))
+            fx = scipy.linspace(x[0], x[-1] + 1, len(x))  # можно установить вместо len(x) большее число для интерполяции
+
+            fig, axs = plt.subplots(2, 1)
+            fig.suptitle('Зависимость масштаба фрактала от количества фаз', fontsize=12)
+
+            axs[0].plot(s, y1, '-o', ms=1, alpha=0.7, mfc='orange')
+            axs[0].set(xlabel='Количество фаз (ед.)', ylabel='Величина по оси абсцисс (ед.)')
+            axs[0].plot(fx, f1(fx), linewidth=2)
+            axs[0].grid(True)
+
+            axs[1].plot(s, y2, '-o', ms=1, alpha=0.7, mfc='orange')
+            axs[1].set(xlabel='Количество фаз (ед.)', ylabel='Величина по оси ординат (ед.)')
+            axs[1].plot(fx, f2(fx), linewidth=2)
+            axs[1].grid(True)
+
+            fig.tight_layout()
+            plt.show()
+
+        # https://habr.com/ru/post/322954/
+        mnkGP(s, x, y)
 
     def _plot_graph_angle(self):
         """
@@ -352,37 +424,6 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set(xlabel='Количество фаз (ед.)', ylabel='Величина угла (градусы)',
                title='Зависимость величин углов каждого из отрезков фрактала от количества фаз')
         ax.grid()
-        plt.show()
-
-    # TODO: approximation
-    def _plot_graph_scale(self):
-        """
-        # TODO: docstring
-        :return:
-        """
-        # TODO: make decorator
-        if self._is_calculations_absent():
-            return
-
-        # TODO: to name this shirt
-        x = [abs(max(max(line.start.x, line.finish.x) for line in lines) -
-                 min(min(line.start.x, line.finish.x) for line in lines)) for lines in self.koch_curve.lines]
-        y = [abs(max(max(line.start.y, line.finish.y) for line in lines) -
-                 min(min(line.start.y, line.finish.y) for line in lines)) for lines in self.koch_curve.lines]
-        s = [i for i in range(len(self.koch_curve.lines))]
-
-        fig, axs = plt.subplots(2, 1)
-        fig.suptitle('Зависимость масштаба фрактала от количества фаз', fontsize=12)
-
-        axs[0].plot(s, x, '-o', ms=5, alpha=0.7, mfc='orange')
-        axs[0].set(xlabel='Количество фаз (ед.)', ylabel='Величина по оси абсцисс (ед.)')
-        axs[0].grid(True)
-
-        axs[1].plot(s, y, '-o', ms=5, alpha=0.7, mfc='orange')
-        axs[1].set(xlabel='Количество фаз (ед.)', ylabel='Величина по оси ординат (ед.)')
-        axs[1].grid(True)
-
-        fig.tight_layout()
         plt.show()
 
     @staticmethod
