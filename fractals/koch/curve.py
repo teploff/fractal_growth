@@ -143,6 +143,11 @@ class Curve:
             while grown_up_segments_exists:
                 grown_up_segments_exists = False
                 for index, active_segment in enumerate(self._active_segments):
+                    # import random
+                    # a = random.randrange(10) * 0.001
+                    # if random.randrange(10) < 5:
+                    #     a *= -1
+                    # print(a)
                     if math.isclose(active_segment.len(), self._max_l_l, abs_tol=ACCURACY) and active_segment.possible:
                         if active_segment.depth == self._count_depth:
                             active_segment.possible = False
