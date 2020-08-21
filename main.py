@@ -435,12 +435,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         y1_x = a_y_x * np.exp(b_y_x * x_train_single)
         y2_y = a_y_y * np.exp(b_y_y * x_train_several)
         import math
-        y3_y = np.array([self.dsb_max_line_legth.value() * ((2 + 2 * math.cos(np.deg2rad(self.dsb_angle.value()))) ** ((i + 1) * self.sb_several_phase_count_iterations.value())) for i in x_train_several])
+        y3_y = np.array([self.dsb_max_line_legth.value() * ((2 + 2 * math.cos(np.deg2rad(self.dsb_angle.value()))) ** ((i + 1) / self.sb_several_phase_count_iterations.value())) for i in x_train_several])
 
 
         fig, ax = plt.subplots()
-        ax.plot(x_train_single, y1_x, linestyle="--", label='Однофазная модель', c='black')
-        ax.plot(x_train_several, y2_y, linestyle=":", label='Многофазная модель', c='black')
+        ax.plot(x_train_single, wingspan_train_single, linestyle="--", label='Однофазная модель', c='black')
+        ax.plot(x_train_several, wingspan_train_several, linestyle=":", label='Многофазная модель', c='black')
         ax.plot(x_train_several, y3_y, linestyle="-", label=r'$(\frac{1}{2+2\cos(\beta)})^{k}$', c='black')
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
