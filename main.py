@@ -414,34 +414,30 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         # TODO: to name this shirt
         wingspan_train_single = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
             min(line.start.x, line.finish.x) for line in lines)) for lines in one_phase_model.lines]
-        x_train_single = [i for i in range(len(one_phase_model.lines))]
-        # wingspan_single = [value for i, value in enumerate(wingspan_train_single)
-        #                    if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
+        # delete points of line growth
+        wingspan_train_single = wingspan_train_single[self.sb_single_phase_count_iterations.value():]
+
+        import math
+        y3_y = np.array([self.dsb_max_line_legth.value() * ((2 + 2 * math.cos(np.deg2rad(self.dsb_angle.value()))) ** (
+                (i + 1) / self.sb_several_phase_count_iterations.value())) for i in range(len(wingspan_train_single))])
+
+        wingspan_train_single = [(i, value) for i, value in enumerate(wingspan_train_single)
+                                 if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
+        x_train_single = [pair[0] for pair in wingspan_train_single]
+        wingspan_train_single = [pair[1] for pair in wingspan_train_single]
 
         wingspan_train_several = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
             min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model.lines]
-        x_train_several = [i for i in range(len(several_phase_model.lines))]
-        # wingspan_several = [value for i, value in enumerate(y_x_train_single)
-        #               if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
-
-        wingspan_train_single = np.array(wingspan_train_single)
-        x_train_single = np.array(x_train_single)
-        wingspan_train_several = np.array(wingspan_train_several)
-        x_train_several = np.array(x_train_several)
-
-        [a_y_x, b_y_x], _ = curve_fit(lambda x1, a, b: a * np.exp(b * x1), x_train_single, wingspan_train_single, p0=[0.01285, 0.0351])
-        [a_y_y, b_y_y], _ = curve_fit(lambda x1, a, b: a * np.exp(b * x1), x_train_several, wingspan_train_several, p0=[0.01285, 0.0351])
-
-        y1_x = a_y_x * np.exp(b_y_x * x_train_single)
-        y2_y = a_y_y * np.exp(b_y_y * x_train_several)
-        import math
-        y3_y = np.array([self.dsb_max_line_legth.value() * ((2 + 2 * math.cos(np.deg2rad(self.dsb_angle.value()))) ** ((i + 1) / self.sb_several_phase_count_iterations.value())) for i in x_train_several])
-
+        # delete points of line growth
+        wingspan_train_several = wingspan_train_several[self.sb_several_phase_count_iterations.value():]
+        x_train_several = [i for i in range(len(wingspan_train_several))]
 
         fig, ax = plt.subplots()
-        ax.plot(x_train_single, wingspan_train_single, linestyle="--", label='Однофазная модель', c='black')
+        ax.plot(x_train_single, wingspan_train_single, 'o', markersize=8, markeredgewidth=3, label='Однофазная модель', c='black')
         ax.plot(x_train_several, wingspan_train_several, linestyle=":", label='Многофазная модель', c='black')
-        ax.plot(x_train_several, y3_y, linestyle="-", label=r'$(\frac{1}{2+2\cos(\beta)})^{k}$', c='black')
+        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$a(2+2\cos(\beta))^{k}$', c='black')
+        ax.set_xlim(xmin=0)
+        ax.set_ylim(ymin=0)
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
         ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Масштаб фрактала (ед.)')
