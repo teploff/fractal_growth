@@ -11,6 +11,7 @@ from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import numpy as np
+from functools import wraps
 
 SCROLL_UP = 4
 SCROLL_DOWN = 5
@@ -25,6 +26,31 @@ BLACK = (0.0, 0.0, 0.0)
 WHITE = (1.0, 1.0, 1.0)
 
 DIRECTORY = './pictures/'
+
+
+def is_calculations_absent(f):
+    """
+    Вычисления фрактальной структуры отсутствуют?
+    :return:
+    """
+
+    @wraps(f)
+    def _impl(self):
+        """
+        Вычисления фрактальной структуры отсутствуют?
+        :param self:
+        :return:
+        """
+        if self.koch_curve is None:
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Critical)
+            msg.setText('Ошибка')
+            msg.setInformativeText('Вычисления отсутсвуют. Необходимо вычислить фрактал!')
+            msg.setWindowTitle('Error')
+            msg.exec_()
+        else:
+            f(self)
+    return _impl
 
 
 class Application(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -97,30 +123,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
                                 **settings)
         self.koch_curve.build()
 
-    def _is_calculations_absent(self):
-        """
-        Вычисления фрактальной структуры отсутствуют?
-        :return:
-        """
-        if self.koch_curve is None:
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Critical)
-            msg.setText('Ошибка')
-            msg.setInformativeText('Вычисления отсутсвуют. Необходимо вычислить фрактал!')
-            msg.setWindowTitle('Error')
-            msg.exec_()
-            return True
-        return False
-
+    @is_calculations_absent
     def _visualize_fractal_growth(self):
         """
         Визуализировать вычисленную фрактальную структуру.
         :return:
         """
-
-        # TODO: make decorator
-        if self._is_calculations_absent():
-            return
 
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
 
@@ -174,15 +182,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
 
             index += 1
 
+    @is_calculations_absent
     def _visualize_thin_out_fractal_growth(self) -> None:
         """
         Прорядить фазы построения фрактальной структуры.
         :return:
         """
-        # TODO: make decorator
-        if self._is_calculations_absent():
-            return
-
         pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
 
         index = 0
@@ -315,15 +320,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sb_several_phase_count_iterations.setHidden(True)
 
     # TODO: approximation
+    @is_calculations_absent
     def _plot_graph_line_len(self) -> None:
         """
         # TODO: docstring
         :return:
         """
-        # TODO: make decorator
-        if self._is_calculations_absent():
-            return
-
         # TODO: to name this shirt
         x_train = [i for i in range(len(self.koch_curve.lines))]
         y_train = [sum(line.len() for line in lines) for i, lines in enumerate(self.koch_curve.lines)]
@@ -348,15 +350,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         plt.show()
 
     # TODO: approximation
+    @is_calculations_absent
     def _plot_graph_scale(self):
         """
         # TODO: docstring
         :return:
         """
-        # TODO: make decorator
-        if self._is_calculations_absent():
-            return
-
         # TODO: to name this shirt
         y_x_train = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(min(line.start.x, line.finish.x) for line in lines)) for lines in self.koch_curve.lines]
         y_x = [value for i, value in enumerate(y_x_train)
@@ -443,15 +442,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Масштаб фрактала (ед.)')
         plt.show()
 
+    @is_calculations_absent
     def _plot_graph_angle(self):
         """
         # TODO: docstring
         :return:
         """
-        # TODO: make decorator
-        if self._is_calculations_absent():
-            return
-
         eps = 0.2
         theta = [[np.deg2rad(line.get_triangle_angle()) for line in lines] for i, lines in enumerate(self.koch_curve.lines) if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
         r = [1 + n * eps for n in range(len(theta))]
