@@ -399,14 +399,16 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         if self._is_calculations_absent():
             return
 
-        eps = 0.1
+        eps = 0.2
         theta = [[np.deg2rad(line.get_triangle_angle()) for line in lines] for i, lines in enumerate(self.koch_curve.lines) if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
         r = [1 + n * eps for n in range(len(theta))]
         ax = plt.subplot(111, polar=True)
         for i in range(len(r)):
             ax.scatter(theta[i], [r[i] for _ in range(len(theta[i]))], alpha=0.75, linewidths=0.1, c='black')
-        ax.set_rmax(2.2)
-        ax.set_rticks([0, 1])  # Less radial ticks
+        ax.set_rmax(2.5)
+        rings = [i * 0.25 for i in range(11)]
+        rings_labels = ["1" if value == 1.0 else "" for value in rings]
+        plt.rgrids(rings, rings_labels)
         ax.grid(True)
         plt.show()
 
