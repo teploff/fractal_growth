@@ -65,6 +65,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rb_regular_polygon.clicked.connect(self._enable_regular_polygon)
         self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
         self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
+        self.pb_graph_scale_one_and_several_phases.clicked.connect(self._plot_graph_scale_one_and_several_phases)
         self.pb_graph_angle.clicked.connect(self._plot_graph_angle)
 
     def _calculation_fractal(self):
@@ -381,10 +382,66 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         y2_y = a_y_y * np.exp(b_y_y * x_train)
 
         fig, ax = plt.subplots()
-        ax.plot(x, y_x, 'x', markersize=8, markeredgewidth=3, label='Значение масштаба фрактала по oX от его глубины')
-        ax.plot(x_train, y1_x, linestyle="--", label='Масштаб фрактала по oX')
-        ax.plot(x, y_y, 'x', markersize=8, markeredgewidth=3, label='Значение масштаба фрактала по oY от его глубины')
-        ax.plot(x_train, y2_y, linestyle=":", label='Масштаб фрактала по oY')
+        ax.plot(x, y_x, 'x', markersize=8, markeredgewidth=3, label='Значение размаха фрактала по oX от его глубины', c='black')
+        ax.plot(x_train, y1_x, linestyle="--", label='Размах фрактала по oX', c='black')
+        ax.plot(x, y_y, 'x', markersize=8, markeredgewidth=3, label='Значение размаха фрактала по oY от его глубины', c='black')
+        ax.plot(x_train, y2_y, linestyle=":", label='Размах фрактала по oY', c='black')
+        ax.grid(True)
+        ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
+        ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Масштаб фрактала (ед.)')
+        plt.show()
+
+    def _plot_graph_scale_one_and_several_phases(self):
+        """
+
+        :return:
+        """
+        settings = dict()
+        settings["model"] = "single"
+        settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
+        one_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                                **settings)
+        one_phase_model.build()
+
+        settings["model"] = "irregular"
+        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
+        several_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                    self.dsb_angle.value(), **settings)
+        several_phase_model.build()
+
+        # TODO: to name this shirt
+        wingspan_train_single = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
+            min(line.start.x, line.finish.x) for line in lines)) for lines in one_phase_model.lines]
+        x_train_single = [i for i in range(len(one_phase_model.lines))]
+        # wingspan_single = [value for i, value in enumerate(wingspan_train_single)
+        #                    if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
+
+        wingspan_train_several = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
+            min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model.lines]
+        x_train_several = [i for i in range(len(several_phase_model.lines))]
+        # wingspan_several = [value for i, value in enumerate(y_x_train_single)
+        #               if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
+
+        wingspan_train_single = np.array(wingspan_train_single)
+        x_train_single = np.array(x_train_single)
+        wingspan_train_several = np.array(wingspan_train_several)
+        x_train_several = np.array(x_train_several)
+
+        [a_y_x, b_y_x], _ = curve_fit(lambda x1, a, b: a * np.exp(b * x1), x_train_single, wingspan_train_single, p0=[0.01285, 0.0351])
+        [a_y_y, b_y_y], _ = curve_fit(lambda x1, a, b: a * np.exp(b * x1), x_train_several, wingspan_train_several, p0=[0.01285, 0.0351])
+
+        y1_x = a_y_x * np.exp(b_y_x * x_train_single)
+        y2_y = a_y_y * np.exp(b_y_y * x_train_several)
+        import math
+        y3_y = np.array([self.dsb_max_line_legth.value() * ((2 + 2 * math.cos(np.deg2rad(self.dsb_angle.value()))) ** ((i + 1) * self.sb_several_phase_count_iterations.value())) for i in x_train_several])
+
+
+        fig, ax = plt.subplots()
+        ax.plot(x_train_single, y1_x, linestyle="--", label='Однофазная модель', c='black')
+        ax.plot(x_train_several, y2_y, linestyle=":", label='Многофазная модель', c='black')
+        ax.plot(x_train_several, y3_y, linestyle="-", label=r'$(\frac{1}{2+2\cos(\beta)})^{k}$', c='black')
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
         ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Масштаб фрактала (ед.)')
