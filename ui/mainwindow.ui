@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>966</width>
-    <height>690</height>
+    <width>999</width>
+    <height>685</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -698,6 +698,37 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_21">
+         <item>
+          <widget class="QLabel" name="lb_graph_line_len_one_and_several_phases">
+           <property name="text">
+            <string>Длина фрактала от количества фаз в однофазной и многофазной модели</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_15">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pb_graph_line_len_one_and_several_phases">
+           <property name="text">
+            <string>Построить</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
           <widget class="QLabel" name="lb_graph_scale">
@@ -800,7 +831,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>966</width>
+     <width>999</width>
      <height>22</height>
     </rect>
    </property>

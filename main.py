@@ -90,6 +90,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rb_irregular_phases.clicked.connect(self._irregular_several_phases)
         self.rb_regular_polygon.clicked.connect(self._enable_regular_polygon)
         self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
+        self.pb_graph_line_len_one_and_several_phases.clicked.connect(self._plot_graph_line_len_one_and_several_phases)
         self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
         self.pb_graph_scale_one_and_several_phases.clicked.connect(self._plot_graph_scale_one_and_several_phases)
         self.pb_graph_angle.clicked.connect(self._plot_graph_angle)
@@ -347,6 +348,56 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.plot(x_train, y1)
         ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Длина фрактала (ед.)')
         ax.grid(True)
+        plt.show()
+
+    def _plot_graph_line_len_one_and_several_phases(self) -> None:
+        """
+
+        :return:
+        """
+
+        settings = dict()
+        settings["model"] = "single"
+        settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
+        one_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                                **settings)
+        one_phase_model.build()
+
+        settings["model"] = "irregular"
+        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
+        several_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                    self.dsb_angle.value(), **settings)
+        several_phase_model.build()
+
+        # TODO: to name this shirt
+        line_lens_train_single = [sum(line.len() for line in lines) for lines in one_phase_model.lines]
+        # delete points of line growth
+        line_lens_train_single = line_lens_train_single[self.sb_single_phase_count_iterations.value():]
+
+        y3_y = np.array([self.dsb_max_line_legth.value() * 4 ** ((i + 1) / self.sb_several_phase_count_iterations.value())
+                         for i in range(len(line_lens_train_single))])
+
+        line_lens_train_single = [(i, value) for i, value in enumerate(line_lens_train_single)
+                                 if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
+        x_train_single = [pair[0] for pair in line_lens_train_single]
+        line_lens_train_single = [pair[1] for pair in line_lens_train_single]
+
+        line_lens_train_several = [sum(line.len() for line in lines) for lines in several_phase_model.lines]
+        # delete points of line growth
+        line_lens_train_several = line_lens_train_several[self.sb_several_phase_count_iterations.value():]
+        x_train_several = [i for i in range(len(line_lens_train_several))]
+
+        fig, ax = plt.subplots()
+        ax.plot(x_train_single, line_lens_train_single, 'o', markersize=8, markeredgewidth=3, label='Однофазная модель', c='black')
+        ax.plot(x_train_several, line_lens_train_several, linestyle=":", label='Многофазная модель', c='black')
+        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$4^{k}a$', c='black')
+        ax.set_xlim(xmin=0)
+        ax.set_ylim(ymin=0)
+        ax.grid(True)
+        ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
+        ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Длина фрактальной линии (ед.)')
         plt.show()
 
     # TODO: approximation
