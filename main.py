@@ -346,7 +346,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         fig, ax = plt.subplots()
         ax.plot(x, y, 'o', label='Original data', markersize=5)
         ax.plot(x_train, y1)
-        ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Длина фрактала (ед.)')
+        ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Длина фрактальной линии, ед.')
         ax.grid(True)
         plt.show()
 
@@ -397,7 +397,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_ylim(ymin=0)
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
-        ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Длина фрактальной линии (ед.)')
+        ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Длина фрактальной линии, ед.')
         plt.show()
 
     # TODO: approximation
@@ -438,7 +438,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.plot(x_train, y2_y, linestyle=":", label='Размах фрактала по oY', c='black')
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
-        ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Масштаб фрактала (ед.)')
+        ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Размах фрактала, ед.')
         plt.show()
 
     def _plot_graph_scale_one_and_several_phases(self):
@@ -490,7 +490,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_ylim(ymin=0)
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
-        ax.set(xlabel='Количество фаз роста фрактала (ед.)', ylabel='Масштаб фрактала (ед.)')
+        ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Размах фрактала фрактала, ед.')
         plt.show()
 
     @is_calculations_absent
