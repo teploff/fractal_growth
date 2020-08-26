@@ -390,14 +390,22 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         x_train_several = [i for i in range(len(line_lens_train_several))]
 
         fig, ax = plt.subplots()
-        ax.plot(x_train_single, line_lens_train_single, 'o', markersize=8, markeredgewidth=3, label='Однофазная модель', c='black')
-        ax.plot(x_train_several, line_lens_train_several, linestyle=":", label='Многофазная модель', c='black')
-        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$4^{k}a$', c='black')
-        ax.set_xlim(xmin=0)
-        ax.set_ylim(ymin=0)
+        ax.plot(x_train_single, line_lens_train_single, 'o', markersize=5, markeredgewidth=3, label='Однофазная модель', c='black')
+        ax.plot(x_train_several, line_lens_train_several, linestyle=":", label='Многофазная модель', c='black', linewidth=5)
+        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$4^{k}a$', c='black', linewidth=2)
+        ax.set_xlim(xmin=100)
+        ax.set_ylim(ymin=-50)
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
         ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Длина фрактальной линии, ед.')
+
+        # setting label sizes after creation
+        ax.xaxis.label.set_size(20)
+        ax.yaxis.label.set_size(20)
+
+        plt.xticks(fontsize=16)
+        plt.yticks(fontsize=16)
+        plt.legend(fontsize=20)
         plt.show()
 
     # TODO: approximation
@@ -483,14 +491,22 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         x_train_several = [i for i in range(len(wingspan_train_several))]
 
         fig, ax = plt.subplots()
-        ax.plot(x_train_single, wingspan_train_single, 'o', markersize=8, markeredgewidth=3, label='Однофазная модель', c='black')
-        ax.plot(x_train_several, wingspan_train_several, linestyle=":", label='Многофазная модель', c='black')
-        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$a(2+2\cos(\beta))^{k}$', c='black')
-        ax.set_xlim(xmin=0)
-        ax.set_ylim(ymin=0)
+        ax.plot(x_train_single, wingspan_train_single, 'o', markersize=5, markeredgewidth=3, label='Однофазная модель', c='black')
+        ax.plot(x_train_several, wingspan_train_several, linestyle=":", label='Многофазная модель', c='black', linewidth=5)
+        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$a(2+2\cos(\beta))^{k}$', c='black', linewidth=2)
+        ax.set_xlim(xmin=100)
+        ax.set_ylim(ymin=-25)
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
         ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Размах фрактала фрактала, ед.')
+
+        # setting label sizes after creation
+        ax.xaxis.label.set_size(20)
+        ax.yaxis.label.set_size(20)
+
+        plt.xticks(fontsize=16)
+        plt.yticks(fontsize=16)
+        plt.legend(fontsize=20)
         plt.show()
 
     @is_calculations_absent
@@ -510,6 +526,11 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         rings_labels = ["1" if value == 1.0 else "" for value in rings]
         plt.rgrids(rings, rings_labels)
         ax.grid(True)
+
+        plt.xticks(fontsize=22)
+        plt.yticks(fontsize=22)
+        ax.set_title(r'$\beta=' + str(int(self.dsb_angle.value())) + r'°$', va='bottom', fontsize=22)
+
         plt.show()
 
     @staticmethod
