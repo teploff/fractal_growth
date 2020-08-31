@@ -477,6 +477,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         x_train_several_1 = [i for i in range(len(wingspan_train_several_1))]
         del several_phase_model_1
         gc.collect()
+        print("First calculation is over")
 
         settings["model"] = "irregular"
         settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
@@ -493,6 +494,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         x_train_several_2 = [i for i in range(len(wingspan_train_several_2))]
         del several_phase_model_2
         gc.collect()
+        print("Second calculation is over")
 
         settings["model"] = "irregular"
         settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
@@ -509,6 +511,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         x_train_several_3 = [i for i in range(len(wingspan_train_several_3))]
         del several_phase_model_3
         gc.collect()
+        print("Third calculation is over")
 
         # TODO: to name this shirt
         wingspan_train_single = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
