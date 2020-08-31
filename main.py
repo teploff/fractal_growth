@@ -461,20 +461,20 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
                                 **settings)
         one_phase_model.build()
 
-        # settings["model"] = "irregular"
-        # settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-        # settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        # settings["count_iterations"] = self.sb_several_phase_count_iterations.value()
-        # several_phase_model_1 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
-        #                             self.dsb_angle.value(), **settings)
-        # several_phase_model_1.build()
-        #
-        # wingspan_train_several_1 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
-        #     min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model_1.lines]
-        # # delete points of line growth
-        # wingspan_train_several_1 = wingspan_train_several_1[self.sb_several_phase_count_iterations.value():]
-        # x_train_several_1 = [i for i in range(len(wingspan_train_several_1))]
-        # print("First calculation is over")
+        settings["model"] = "irregular"
+        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+        settings["count_iterations"] = self.sb_several_phase_count_iterations.value()
+        several_phase_model_1 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                    self.dsb_angle.value(), **settings)
+        several_phase_model_1.build()
+
+        wingspan_train_several_1 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
+            min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model_1.lines]
+        # delete points of line growth
+        wingspan_train_several_1 = wingspan_train_several_1[self.sb_several_phase_count_iterations.value():]
+        x_train_several_1 = [i for i in range(len(wingspan_train_several_1))]
+        print("First calculation is over")
 
         settings["model"] = "irregular"
         settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
@@ -492,20 +492,20 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         print("Second calculation is over")
 
 
-        settings["model"] = "irregular"
-        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 80)
-        several_phase_model_3 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
-                                      self.dsb_angle.value(), **settings)
-        several_phase_model_3.build()
-
-        wingspan_train_several_3 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
-            min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model_3.lines]
-        # delete points of line growth
-        wingspan_train_several_3 = wingspan_train_several_3[self.sb_several_phase_count_iterations.value():]
-        x_train_several_3 = [i for i in range(len(wingspan_train_several_3))]
-        print("Third calculation is over")
+        # settings["model"] = "irregular"
+        # settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+        # settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+        # settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 80)
+        # several_phase_model_3 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+        #                               self.dsb_angle.value(), **settings)
+        # several_phase_model_3.build()
+        #
+        # wingspan_train_several_3 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
+        #     min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model_3.lines]
+        # # delete points of line growth
+        # wingspan_train_several_3 = wingspan_train_several_3[self.sb_several_phase_count_iterations.value():]
+        # x_train_several_3 = [i for i in range(len(wingspan_train_several_3))]
+        # print("Third calculation is over")
 
 
         # TODO: to name this shirt
@@ -526,9 +526,9 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         fig, ax = plt.subplots()
         fig.set_size_inches(18.5, 10.5)
         ax.plot(x_train_single, wingspan_train_single, 'o', markersize=5, markeredgewidth=3, label='Однофазная модель', c='black')
-        # ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label='Многофазная модель 1', c='black', linewidth=5)
+        ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label='Многофазная модель 1', c='black', linewidth=5)
         ax.plot(x_train_several_2, wingspan_train_several_2, linestyle="--", label='Многофазная модель 2', c='black', linewidth=5)
-        ax.plot(x_train_several_3, wingspan_train_several_3, linestyle=":", label='Многофазная модель 3', c='black', linewidth=5)
+        # ax.plot(x_train_several_3, wingspan_train_several_3, linestyle=":", label='Многофазная модель 3', c='black', linewidth=5)
         ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$a(2+2\cos(\beta))^{k}$', c='black', linewidth=2)
         ax.set_xlim(xmin=5)
         ax.set_ylim(ymin=-25)
