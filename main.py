@@ -371,6 +371,14 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
                                     self.dsb_angle.value(), **settings)
         several_phase_model.build()
 
+        settings["model"] = "irregular"
+        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 40)
+        several_phase_model_2 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                      self.dsb_angle.value(), **settings)
+        several_phase_model_2.build()
+
         # TODO: to name this shirt
         line_lens_train_single = [sum(line.len() for line in lines) for lines in one_phase_model.lines]
         # delete points of line growth
@@ -389,23 +397,29 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         line_lens_train_several = line_lens_train_several[self.sb_several_phase_count_iterations.value():]
         x_train_several = [i for i in range(len(line_lens_train_several))]
 
+        line_lens_train_several_2 = [sum(line.len() for line in lines) for lines in several_phase_model_2.lines]
+        # delete points of line growth
+        line_lens_train_several_2 = line_lens_train_several_2[self.sb_several_phase_count_iterations.value() - 40:]
+        x_train_several_2 = [i for i in range(len(line_lens_train_several_2))]
+
         fig, ax = plt.subplots()
         ax.plot(x_train_single, line_lens_train_single, 'o', markersize=5, markeredgewidth=3, label='Однофазная модель', c='black')
-        ax.plot(x_train_several, line_lens_train_several, linestyle=":", label='Многофазная модель', c='black', linewidth=5)
+        ax.plot(x_train_several, line_lens_train_several, linestyle=":", label=r'Многофазная модель c $\Delta=\frac{a}{'+ str(self.sb_several_phase_count_iterations.value()) +'}$', c='black', linewidth=5)
+        ax.plot(x_train_several_2, line_lens_train_several_2, linestyle="--", label=r'Многофазная модель c $\Delta=\frac{a}{'+ str(self.sb_several_phase_count_iterations.value() - 40) +'}$', c='black', linewidth=5)
         ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$4^{k}a$', c='black', linewidth=2)
         ax.set_xlim(xmin=100)
         ax.set_ylim(ymin=-50)
         ax.grid(True)
         ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
-        ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Длина фрактальной линии, ед.')
+        ax.set(xlabel='Число циклов роста, ед.', ylabel='Длина фрактальной линии, ед.')
 
         # setting label sizes after creation
-        ax.xaxis.label.set_size(20)
-        ax.yaxis.label.set_size(20)
+        ax.xaxis.label.set_size(25)
+        ax.yaxis.label.set_size(25)
 
-        plt.xticks(fontsize=16)
-        plt.yticks(fontsize=16)
-        plt.legend(fontsize=20)
+        plt.xticks(fontsize=25)
+        plt.yticks(fontsize=25)
+        plt.legend(fontsize=25)
         plt.show()
 
     # TODO: approximation
@@ -491,23 +505,6 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         x_train_several_2 = [i for i in range(len(wingspan_train_several_2))]
         print("Second calculation is over")
 
-
-        # settings["model"] = "irregular"
-        # settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-        # settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        # settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 80)
-        # several_phase_model_3 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
-        #                               self.dsb_angle.value(), **settings)
-        # several_phase_model_3.build()
-        #
-        # wingspan_train_several_3 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
-        #     min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model_3.lines]
-        # # delete points of line growth
-        # wingspan_train_several_3 = wingspan_train_several_3[self.sb_several_phase_count_iterations.value():]
-        # x_train_several_3 = [i for i in range(len(wingspan_train_several_3))]
-        # print("Third calculation is over")
-
-
         # TODO: to name this shirt
         wingspan_train_single = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
             min(line.start.x, line.finish.x) for line in lines)) for lines in one_phase_model.lines]
@@ -526,23 +523,22 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         fig, ax = plt.subplots()
         fig.set_size_inches(18.5, 10.5)
         ax.plot(x_train_single, wingspan_train_single, 'o', markersize=5, markeredgewidth=3, label='Однофазная модель', c='black')
-        ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label='Многофазная модель 1', c='black', linewidth=5)
-        ax.plot(x_train_several_2, wingspan_train_several_2, linestyle="--", label='Многофазная модель 2', c='black', linewidth=5)
-        # ax.plot(x_train_several_3, wingspan_train_several_3, linestyle=":", label='Многофазная модель 3', c='black', linewidth=5)
+        ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label=r'Многофазная модель c $\Delta=\frac{a}{'+ str(self.sb_several_phase_count_iterations.value()) +'}$', c='black', linewidth=5)
+        ax.plot(x_train_several_2, wingspan_train_several_2, linestyle="--", label=r'Многофазная модель c $\Delta=\frac{a}{'+ str(self.sb_several_phase_count_iterations.value() - 40) +'}$', c='black', linewidth=5)
         ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$a(2+2\cos(\beta))^{k}$', c='black', linewidth=2)
         ax.set_xlim(xmin=5)
         ax.set_ylim(ymin=-25)
         ax.grid(True)
         ax.legend(loc='lower right', fancybox=True, framealpha=1, shadow=True, borderpad=1)
-        ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Размах фрактала фрактала, ед.')
+        ax.set(xlabel='Число циклов роста, ед.', ylabel='Размах фрактала, ед.')
 
         # setting label sizes after creation
-        ax.xaxis.label.set_size(20)
-        ax.yaxis.label.set_size(20)
+        ax.xaxis.label.set_size(25)
+        ax.yaxis.label.set_size(25)
 
-        plt.xticks(fontsize=16)
-        plt.yticks(fontsize=16)
-        plt.legend(fontsize=20)
+        plt.xticks(fontsize=25)
+        plt.yticks(fontsize=25)
+        plt.legend(fontsize=25)
         plt.show()
 
     @is_calculations_absent
