@@ -374,7 +374,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         settings["model"] = "irregular"
         settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
         settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 40)
+        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 30)
         several_phase_model_2 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
                                       self.dsb_angle.value(), **settings)
         several_phase_model_2.build()
@@ -399,14 +399,14 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
 
         line_lens_train_several_2 = [sum(line.len() for line in lines) for lines in several_phase_model_2.lines]
         # delete points of line growth
-        line_lens_train_several_2 = line_lens_train_several_2[self.sb_several_phase_count_iterations.value() - 40:]
+        line_lens_train_several_2 = line_lens_train_several_2[self.sb_several_phase_count_iterations.value() - 30:]
         x_train_several_2 = [i for i in range(len(line_lens_train_several_2))]
 
         fig, ax = plt.subplots()
-        ax.plot(x_train_single, line_lens_train_single, 'o', markersize=5, markeredgewidth=3, label='Однофазная модель', c='black')
-        ax.plot(x_train_several, line_lens_train_several, linestyle=":", label=r'Многофазная модель c $\Delta=\frac{a}{'+ str(self.sb_several_phase_count_iterations.value()) +'}$', c='black', linewidth=5)
-        ax.plot(x_train_several_2, line_lens_train_several_2, linestyle="--", label=r'Многофазная модель c $\Delta=\frac{a}{'+ str(self.sb_several_phase_count_iterations.value() - 40) +'}$', c='black', linewidth=5)
-        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$4^{k}a$', c='black', linewidth=2)
+        ax.plot(x_train_single, line_lens_train_single, 'o', markersize=5, markeredgewidth=3, label=r'$a$', c='black')
+        ax.plot(x_train_several, line_lens_train_several, linestyle=":", label=r'$b$', c='black', linewidth=5)
+        ax.plot(x_train_several_2, line_lens_train_several_2, linestyle="--", label=r'$c$', c='black', linewidth=5)
+        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$f_1$', c='black', linewidth=2)
         ax.set_xlim(xmin=100)
         ax.set_ylim(ymin=-50)
         ax.grid(True)
@@ -414,12 +414,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set(xlabel='Число циклов роста, ед.', ylabel='Длина фрактальной линии, ед.')
 
         # setting label sizes after creation
-        ax.xaxis.label.set_size(25)
-        ax.yaxis.label.set_size(25)
+        ax.xaxis.label.set_size(30)
+        ax.yaxis.label.set_size(30)
 
-        plt.xticks(fontsize=25)
-        plt.yticks(fontsize=25)
-        plt.legend(fontsize=25)
+        plt.xticks(fontsize=30)
+        plt.yticks(fontsize=30)
+        plt.legend(fontsize=30)
         plt.show()
 
     # TODO: approximation
@@ -522,10 +522,10 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
 
         fig, ax = plt.subplots()
         fig.set_size_inches(18.5, 10.5)
-        ax.plot(x_train_single, wingspan_train_single, 'o', markersize=5, markeredgewidth=3, label='Однофазная модель', c='black')
-        ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label=r'Многофазная модель c $\Delta=\frac{a}{'+ str(self.sb_several_phase_count_iterations.value()) +'}$', c='black', linewidth=5)
-        ax.plot(x_train_several_2, wingspan_train_several_2, linestyle="--", label=r'Многофазная модель c $\Delta=\frac{a}{'+ str(self.sb_several_phase_count_iterations.value() - 40) +'}$', c='black', linewidth=5)
-        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$a(2+2\cos(\beta))^{k}$', c='black', linewidth=2)
+        ax.plot(x_train_single, wingspan_train_single, 'o', markersize=5, markeredgewidth=3, label=r'$a$', c='black')
+        ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label=r'$b$', c='black', linewidth=5)
+        ax.plot(x_train_several_2, wingspan_train_several_2, linestyle="--", label=r'$c$', c='black', linewidth=5)
+        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$f_2$', c='black', linewidth=2)
         ax.set_xlim(xmin=5)
         ax.set_ylim(ymin=-25)
         ax.grid(True)
@@ -533,12 +533,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set(xlabel='Число циклов роста, ед.', ylabel='Размах фрактала, ед.')
 
         # setting label sizes after creation
-        ax.xaxis.label.set_size(25)
-        ax.yaxis.label.set_size(25)
+        ax.xaxis.label.set_size(30)
+        ax.yaxis.label.set_size(30)
 
-        plt.xticks(fontsize=25)
-        plt.yticks(fontsize=25)
-        plt.legend(fontsize=25)
+        plt.xticks(fontsize=30)
+        plt.yticks(fontsize=30)
+        plt.legend(fontsize=30)
         plt.show()
 
     @is_calculations_absent
