@@ -408,7 +408,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.plot(x_x_train, y_y_train, label=r'$a$', c='black', linewidth=5)
         ax.plot(x_train_several, line_lens_train_several, linestyle=":", label=r'$b$', c='black', linewidth=5)
         ax.plot(x_train_several_2, line_lens_train_several_2, linestyle="--", label=r'$c$', c='black', linewidth=5)
-        ax.plot(x_train_single, line_lens_train_single, 'o', markersize=10, markeredgewidth=3, label=r'$f_1$', c='black')
+        ax.plot(x_train_single, line_lens_train_single, 's', markersize=10, markeredgewidth=3, label=r'$f_1$', c='black')
         # ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$f_1$', c='black', linewidth=2)
         ax.set_xlim(xmin=100)
         ax.set_ylim(ymin=-50)
@@ -534,7 +534,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.plot(x_train_single_2, wingspan_train_single_2, label=r'$a$', c='black', linewidth=5)
         ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label=r'$b$', c='black', linewidth=5)
         ax.plot(x_train_several_2, wingspan_train_several_2, linestyle="--", label=r'$c$', c='black', linewidth=5)
-        ax.plot(x_train_single, wingspan_train_single, 'o', markersize=5, markeredgewidth=3, label=r'$f_2$', c='black')
+        ax.plot(x_train_single, wingspan_train_single, 's', markersize=10, markeredgewidth=3, label=r'$f_2$', c='black')
         ax.set_xlim(xmin=5)
         ax.set_ylim(ymin=-25)
         ax.grid(True)
@@ -558,19 +558,20 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         eps = 0.2
         theta = [[np.deg2rad(line.get_triangle_angle()) for line in lines] for i, lines in enumerate(self.koch_curve.lines) if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
+        theta = theta[1:]
         r = [1 + n * eps for n in range(len(theta))]
         ax = plt.subplot(111, polar=True)
         for i in range(len(r)):
-            ax.scatter(theta[i], [r[i] for _ in range(len(theta[i]))], alpha=0.75, linewidths=0.1, c='black')
+            ax.scatter(theta[i], [r[i] for _ in range(len(theta[i]))], alpha=1, linewidths=2.5, c='black')
         ax.set_rmax(2.5)
         rings = [i * 0.25 for i in range(11)]
         rings_labels = ["1" if value == 1.0 else "" for value in rings]
         plt.rgrids(rings, rings_labels)
         ax.grid(True)
 
-        plt.xticks(fontsize=22)
-        plt.yticks(fontsize=22)
-        ax.set_title(r'$\beta=' + str(int(self.dsb_angle.value())) + r'°$', va='bottom', fontsize=22)
+        plt.xticks(fontsize=30)
+        plt.yticks(fontsize=30)
+        ax.set_title(r'$\beta=' + str(int(self.dsb_angle.value())) + r'°$', va='bottom', fontsize=30)
 
         plt.show()
 
