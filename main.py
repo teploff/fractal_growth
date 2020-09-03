@@ -383,6 +383,8 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         line_lens_train_single = [sum(line.len() for line in lines) for lines in one_phase_model.lines]
         # delete points of line growth
         line_lens_train_single = line_lens_train_single[self.sb_single_phase_count_iterations.value():]
+        x_x_train = [i for i in range(len(line_lens_train_single))]
+        y_y_train = line_lens_train_single[:]
 
         y3_y = np.array([self.dsb_max_line_legth.value() * 4 ** ((i + 1) / self.sb_several_phase_count_iterations.value())
                          for i in range(len(line_lens_train_single))])
@@ -403,10 +405,11 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         x_train_several_2 = [i for i in range(len(line_lens_train_several_2))]
 
         fig, ax = plt.subplots()
-        ax.plot(x_train_single, line_lens_train_single, 'o', markersize=5, markeredgewidth=3, label=r'$a$', c='black')
+        ax.plot(x_x_train, y_y_train, label=r'$a$', c='black', linewidth=5)
         ax.plot(x_train_several, line_lens_train_several, linestyle=":", label=r'$b$', c='black', linewidth=5)
         ax.plot(x_train_several_2, line_lens_train_several_2, linestyle="--", label=r'$c$', c='black', linewidth=5)
-        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$f_1$', c='black', linewidth=2)
+        ax.plot(x_train_single, line_lens_train_single, 'o', markersize=10, markeredgewidth=3, label=r'$f_1$', c='black')
+        # ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$f_1$', c='black', linewidth=2)
         ax.set_xlim(xmin=100)
         ax.set_ylim(ymin=-50)
         ax.grid(True)
@@ -475,6 +478,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
                                 **settings)
         one_phase_model.build()
 
+        wingspan_train_single_2 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
+            min(line.start.x, line.finish.x) for line in lines)) for lines in one_phase_model.lines]
+        # delete points of line growth
+        wingspan_train_single_2 = wingspan_train_single_2[self.sb_single_phase_count_iterations.value():]
+        x_train_single_2 = [i for i in range(len(wingspan_train_single_2))]
+
         settings["model"] = "irregular"
         settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
         settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
@@ -493,7 +502,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         settings["model"] = "irregular"
         settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
         settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 40)
+        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 30)
         several_phase_model_2 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
                                       self.dsb_angle.value(), **settings)
         several_phase_model_2.build()
@@ -501,7 +510,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         wingspan_train_several_2 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
             min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model_2.lines]
         # delete points of line growth
-        wingspan_train_several_2 = wingspan_train_several_2[self.sb_several_phase_count_iterations.value():]
+        wingspan_train_several_2 = wingspan_train_several_2[self.sb_several_phase_count_iterations.value() - 30:]
         x_train_several_2 = [i for i in range(len(wingspan_train_several_2))]
         print("Second calculation is over")
 
@@ -522,10 +531,10 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
 
         fig, ax = plt.subplots()
         fig.set_size_inches(18.5, 10.5)
-        ax.plot(x_train_single, wingspan_train_single, 'o', markersize=5, markeredgewidth=3, label=r'$a$', c='black')
+        ax.plot(x_train_single_2, wingspan_train_single_2, label=r'$a$', c='black', linewidth=5)
         ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label=r'$b$', c='black', linewidth=5)
         ax.plot(x_train_several_2, wingspan_train_several_2, linestyle="--", label=r'$c$', c='black', linewidth=5)
-        ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$f_2$', c='black', linewidth=2)
+        ax.plot(x_train_single, wingspan_train_single, 'o', markersize=5, markeredgewidth=3, label=r'$f_2$', c='black')
         ax.set_xlim(xmin=5)
         ax.set_ylim(ymin=-25)
         ax.grid(True)
