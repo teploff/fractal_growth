@@ -90,41 +90,6 @@ class Curve:
         self.lines = calc_segment_phases(CENTER, self._settings["count_iterations"], self._max_l_l)
         self._active_segments = deepcopy(self.lines[-1])
 
-        if self._count_depth == 1:
-            return
-
-        length = self._settings["coefficient_a"] * self._max_l_l
-        height = self._settings["coefficient_h"] * self._max_l_l
-
-        while len(self._active_segments) < 4 ** (self._count_depth + 2):
-            grown_up_segments_exists = True
-            exist = False
-            while grown_up_segments_exists:
-                grown_up_segments_exists = False
-                for index, active_segment in enumerate(self._active_segments):
-                    if math.isclose(active_segment.len(), self._max_l_l, abs_tol=ACCURACY):
-                        exist = True
-                        grown_up_segments_exists = True
-                        curr_angle = active_segment.get_triangle_angle()
-                        self._active_segments[index:index + 1] = calc_base_struct(height, length, active_segment.start,
-                                                                                  curr_angle, self._angle)
-                        break
-
-            if exist:
-                self.lines.append(deepcopy(stick_segments(deepcopy(self._active_segments), CENTER)))
-
-            for active_segment in self._active_segments:
-                increase_segment_length(active_segment, self._max_l_l / self._settings["count_iterations"])
-            self.lines.append(deepcopy(stick_segments(deepcopy(self._active_segments), CENTER)))
-
-    def _calculate_irregular_phases(self) -> None:
-        """
-
-        :return:
-        """
-        self.lines = calc_segment_phases(CENTER, self._settings["count_iterations"], self._max_l_l)
-        self._active_segments = deepcopy(self.lines[-1])
-
         for segment in self._active_segments:
             segment.depth = 1
             segment.possible = True
@@ -203,8 +168,6 @@ class Curve:
             self._calculate_single_phase()
         elif self._settings["model"] == "several":
             self._calculate_several_phases()
-        elif self._settings["model"] == "irregular":
-            self._calculate_irregular_phases()
         elif self._settings["model"] == "regular_polygon":
             self._calculate_regular_polygon()
         else:

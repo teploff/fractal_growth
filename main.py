@@ -1,8 +1,8 @@
 from typing import List, Tuple
 import pygame
 import sys  # sys нужен для передачи argv в QApplication
-from PyQt5 import QtWidgets, QtGui
-from ui.design import Ui_MainWindow
+from PyQt5 import QtWidgets, QtGui, QtCore
+from ui.main_window import Ui_MainWindow
 from OpenGL.GL import *
 # from OpenGL.GLU import *
 from geometry.entity_2d import Segment
@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import numpy as np
 from functools import wraps
+from pathlib import Path
 
 SCROLL_UP = 4
 SCROLL_DOWN = 5
@@ -24,8 +25,6 @@ MAX_LINE_LENGTH = 0.05
 N_ITER = 20
 BLACK = (0.0, 0.0, 0.0)
 WHITE = (1.0, 1.0, 1.0)
-
-DIRECTORY = './pictures/'
 
 
 def is_calculations_absent(f):
@@ -59,8 +58,10 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        # make default settings
         self.koch_curve = None
+        self.export_folder_path = None
+
+        # make default settings
         self.error_dialog = QtWidgets.QErrorMessage()
         self.rgb_lines = BLACK
         self.rgb_background = WHITE
@@ -86,9 +87,10 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pb_line_color.clicked.connect(self._pick_lines_color)
         self.pb_background_color.clicked.connect(self._pick_background_color)
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
-        self.rb_several_phases.clicked.connect(self._enable_several_phases)
-        self.rb_irregular_phases.clicked.connect(self._irregular_several_phases)
+        self.rb_several_phases.clicked.connect(self._several_phases)
         self.rb_regular_polygon.clicked.connect(self._enable_regular_polygon)
+        self.cb_screenshot.clicked.connect(self._make_screenshot)
+        self.pb_screenshot_path.clicked.connect(self._choose_file_path)
         self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
         self.pb_graph_line_len_one_and_several_phases.clicked.connect(self._plot_graph_line_len_one_and_several_phases)
         self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
@@ -106,11 +108,6 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
             settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
         elif self.rb_several_phases.isChecked():
             settings["model"] = "several"
-            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
-        elif self.rb_irregular_phases.isChecked():
-            settings["model"] = "irregular"
             settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
             settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
             settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
@@ -139,8 +136,9 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
             self.draw(self.koch_curve.lines[index % len(self.koch_curve.lines)], self.rgb_lines, self.rgb_background,
                       self.sb_draw_latency.value())
             # # TODO: make save image
-            if index != 0 and index < len(self.koch_curve.lines):
-                self.save_image(DIRECTORY, str(index) + '.png')
+            if self.cb_screenshot.isChecked() and self.export_folder_path is not None:
+                if index != 0 and index < len(self.koch_curve.lines):
+                    self.save_image(self.export_folder_path, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -169,8 +167,9 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
             self.draw_points(a, self.rgb_lines, self.rgb_background, self.sb_draw_latency.value())
 
             # TODO: make save image
-            if index != 0 and index < len(self.koch_curve.lines):
-                self.save_image(DIRECTORY, str(index) + '.png')
+            if self.cb_screenshot.isChecked() and self.export_folder_path is not None:
+                if index != 0 and index < len(self.koch_curve.lines):
+                    self.save_image(self.export_folder_path, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -210,8 +209,9 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
             self.draw(a, self.rgb_lines, self.rgb_background, self.sb_draw_latency.value())
 
             # TODO: make save image
-            if index != 0 and index < len(self.koch_curve.lines):
-                self.save_image(DIRECTORY, str(index) + '.png')
+            if self.cb_screenshot.isChecked() and self.export_folder_path is not None:
+                if index != 0 and index < len(self.koch_curve.lines):
+                    self.save_image(self.export_folder_path, str(index) + '.png')
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -232,7 +232,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         color = QtWidgets.QColorDialog.getColor()
 
         self.rgb_lines = (color.redF(), color.greenF(), color.blueF())
-        self.pb_line_color.setStyleSheet(f"QWidget {{ background-color: {color.name()} }}")
+        self.pb_line_color.setStyleSheet(f'QWidget {{ background-color: {color.name()} }}')
 
     def _pick_background_color(self) -> None:
         """
@@ -242,7 +242,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         color = QtWidgets.QColorDialog.getColor()
 
         self.rgb_background = (color.redF(), color.greenF(), color.blueF())
-        self.pb_background_color.setStyleSheet(f"QWidget {{ background-color: {color.name()} }}")
+        self.pb_background_color.setStyleSheet(f'QWidget {{ background-color: {color.name()} }}')
 
     def _enable_single_phase(self) -> None:
         """
@@ -263,31 +263,12 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.l_several_phase_count_iterations.setHidden(True)
         self.sb_several_phase_count_iterations.setHidden(True)
 
-    def _enable_several_phases(self) -> None:
+    def _several_phases(self) -> None:
         """
         Выбор построения многофазной модели.
         :return:
         """
         self.l_image.setPixmap(QtGui.QPixmap("./static/several_phases_model.png"))
-        self.l_single_phase_count_iterations.setHidden(True)
-        self.sb_single_phase_count_iterations.setHidden(True)
-        self.lb_regular_polygon_count_angle.setHidden(True)
-        self.sb_regular_polygon_count_angle.setHidden(True)
-        self.rb_regular_polygon_build_inside.setHidden(True)
-        self.rb_regular_polygon_build_outside.setHidden(True)
-        self.l_several_phase_coefficient_a.setHidden(False)
-        self.dsb_several_phase_coefficient_a.setHidden(False)
-        self.l_several_phase_coefficient_h.setHidden(False)
-        self.dsb_several_phase_coefficient_h.setHidden(False)
-        self.l_several_phase_count_iterations.setHidden(False)
-        self.sb_several_phase_count_iterations.setHidden(False)
-
-    def _irregular_several_phases(self) -> None:
-        """
-        Выбор построения нерегулярной модели.
-        :return:
-        """
-        self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
         self.l_single_phase_count_iterations.setHidden(False)
         self.sb_single_phase_count_iterations.setHidden(False)
         self.lb_regular_polygon_count_angle.setHidden(True)
@@ -319,6 +300,30 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dsb_several_phase_coefficient_h.setHidden(True)
         self.l_several_phase_count_iterations.setHidden(True)
         self.sb_several_phase_count_iterations.setHidden(True)
+
+    def _make_screenshot(self) -> None:
+        """
+        Включит или отключить опцию экспорта скриншотов построения структур.
+        :return:
+        """
+        if self.cb_screenshot.isChecked():
+            self.pb_screenshot_path.setEnabled(True)
+        else:
+            self.pb_screenshot_path.setEnabled(False)
+
+    def _choose_file_path(self) -> None:
+        """
+        Выбор директории экспорта изображений.
+        :return:
+        """
+
+        self.export_folder_path = Path(QtWidgets.QFileDialog.getExistingDirectory(
+            self, 'Select exporting folder...', '/home', QtWidgets.QFileDialog.ShowDirsOnly))
+
+        preview = str(self.export_folder_path)
+        if len(preview) > 20:
+            preview = preview[:20] + "..."
+        self.pb_screenshot_path.setText(preview)
 
     # TODO: approximation
     @is_calculations_absent
@@ -633,7 +638,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
     # TODO: make full file path
     # TODO: choose color to transparency
     # TODO: move to another package
-    def save_image(directory: str, file_name: str) -> None:
+    def save_image(directory: Path, file_name: str) -> None:
         """
         Сохранение текущего состояния канваса OpenGL в виде PNG файла на диск с прозрачным фоном, заменив при этом все
         белые пиксели.
@@ -655,7 +660,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
                 new_data.append(item)
         image.putdata(new_data)
 
-        image.save(directory + file_name, 'PNG')
+        image.save(directory / file_name, 'PNG')
 
 
 def main():
