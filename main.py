@@ -2,7 +2,9 @@ from typing import List, Tuple
 import pygame
 import sys  # sys нужен для передачи argv в QApplication
 from PyQt5 import QtWidgets, QtGui, QtCore
-from ui.main_window import Ui_MainWindow
+from ui.main_window import Ui_MainWindow as UiMainWindow
+from ui.one_phase_window import Ui_MainWindow as UiOnePhase
+from ui.several_phases_window import Ui_MainWindow as UiSeveralPhases
 from OpenGL.GL import *
 # from OpenGL.GLU import *
 from geometry.entity_2d import Segment
@@ -13,6 +15,7 @@ from scipy.optimize import curve_fit
 import numpy as np
 from functools import wraps
 from pathlib import Path
+from analytics.graphs import plot_graph_line_len, plot_graph_scale
 
 SCROLL_UP = 4
 SCROLL_DOWN = 5
@@ -52,7 +55,72 @@ def is_calculations_absent(f):
     return _impl
 
 
-class Application(QtWidgets.QMainWindow, Ui_MainWindow):
+class OnePhaseApp(QtWidgets.QMainWindow, UiOnePhase):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+
+        self.koch_curve = None
+
+        # make default settings
+        self.l_image.setPixmap(QtGui.QPixmap('./static/single_phase_model.png'))
+
+        # callbacks
+        self.pb_calculate_fractal.clicked.connect(self._calculate)
+
+    def _calculate(self) -> None:
+        """
+
+        :return:
+        """
+
+        settings = {
+            'model': 'single',
+            'count_iterations': self.sb_count_iterations.value()
+        }
+
+        self.koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                                **settings)
+        self.koch_curve.build()
+
+        # escape line growth phases, so lines = lines[count_iter:]
+        plot_graph_line_len(self.koch_curve.lines[self.sb_count_iterations.value():], self.sb_count_iterations.value())
+
+
+class SeveralPhasesApp(QtWidgets.QMainWindow, UiSeveralPhases):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+
+        self.koch_curve = None
+
+        # make default settings
+        self.l_image.setPixmap(QtGui.QPixmap('./static/several_phases_model.png'))
+
+        # callbacks
+        self.pb_calculate_fractal.clicked.connect(self._calculate)
+
+    def _calculate(self) -> None:
+        """
+
+        :return:
+        """
+        settings = {
+            'model': 'several',
+            'count_iterations': self.sb_count_iterations.value(),
+            'coefficient_a': self.dsb_several_phase_coefficient_a.value(),
+            'coefficient_h': self.dsb_several_phase_coefficient_h.value()
+        }
+
+        self.koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
+                                **settings)
+        self.koch_curve.build()
+
+        # escape line growth phases, so lines = lines[count_iter:]
+        plot_graph_scale(self.koch_curve.lines[self.sb_count_iterations.value():], self.sb_count_iterations.value())
+
+
+class Application(QtWidgets.QMainWindow, UiMainWindow):
     def __init__(self):
         # initialize components from generated design.py
         super().__init__()
@@ -74,8 +142,9 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dsb_several_phase_coefficient_a.setHidden(True)
         self.l_several_phase_coefficient_h.setHidden(True)
         self.dsb_several_phase_coefficient_h.setHidden(True)
-        self.l_several_phase_count_iterations.setHidden(True)
-        self.sb_several_phase_count_iterations.setHidden(True)
+
+        self.one_phase_window = OnePhaseApp()
+        self.several_phases_window = SeveralPhasesApp()
 
         pygame.init()
 
@@ -91,7 +160,7 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rb_regular_polygon.clicked.connect(self._enable_regular_polygon)
         self.cb_screenshot.clicked.connect(self._make_screenshot)
         self.pb_screenshot_path.clicked.connect(self._choose_file_path)
-        # self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
+        self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
         self.pb_graph_line_len_one_and_several_phases.clicked.connect(self._plot_graph_line_len_one_and_several_phases)
         self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
         self.pb_graph_scale_one_and_several_phases.clicked.connect(self._plot_graph_scale_one_and_several_phases)
@@ -105,15 +174,15 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         settings = dict()
         if self.rb_single_phase.isChecked():
             settings["model"] = "single"
-            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
+            settings["count_iterations"] = self.sb_count_iterations.value()
         elif self.rb_several_phases.isChecked():
             settings["model"] = "several"
             settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
             settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-            settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
+            settings["count_iterations"] = int(self.sb_count_iterations.value())
         else:
             settings["model"] = "regular_polygon"
-            settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
+            settings["count_iterations"] = self.sb_count_iterations.value()
             settings["count_angles"] = self.sb_regular_polygon_count_angle.value()
             settings["building_way"] = "inside" if self.rb_regular_polygon_build_inside.isChecked() else "outside"
 
@@ -250,18 +319,14 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         :return:
         """
         self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
-        self.l_single_phase_count_iterations.setHidden(False)
-        self.sb_single_phase_count_iterations.setHidden(False)
-        self.lb_regular_polygon_count_angle.setHidden(True)
-        self.sb_regular_polygon_count_angle.setHidden(True)
-        self.rb_regular_polygon_build_inside.setHidden(True)
-        self.rb_regular_polygon_build_outside.setHidden(True)
-        self.l_several_phase_coefficient_a.setHidden(True)
-        self.dsb_several_phase_coefficient_a.setHidden(True)
-        self.l_several_phase_coefficient_h.setHidden(True)
-        self.dsb_several_phase_coefficient_h.setHidden(True)
-        self.l_several_phase_count_iterations.setHidden(True)
-        self.sb_several_phase_count_iterations.setHidden(True)
+        self.lb_regular_polygon_count_angle.hide()
+        self.sb_regular_polygon_count_angle.hide()
+        self.rb_regular_polygon_build_inside.hide()
+        self.rb_regular_polygon_build_outside.hide()
+        self.l_several_phase_coefficient_a.hide()
+        self.dsb_several_phase_coefficient_a.hide()
+        self.l_several_phase_coefficient_h.hide()
+        self.dsb_several_phase_coefficient_h.hide()
 
     def _several_phases(self) -> None:
         """
@@ -269,8 +334,6 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         :return:
         """
         self.l_image.setPixmap(QtGui.QPixmap("./static/several_phases_model.png"))
-        self.l_single_phase_count_iterations.setHidden(False)
-        self.sb_single_phase_count_iterations.setHidden(False)
         self.lb_regular_polygon_count_angle.setHidden(True)
         self.sb_regular_polygon_count_angle.setHidden(True)
         self.rb_regular_polygon_build_inside.setHidden(True)
@@ -279,8 +342,6 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dsb_several_phase_coefficient_a.setHidden(False)
         self.l_several_phase_coefficient_h.setHidden(False)
         self.dsb_several_phase_coefficient_h.setHidden(False)
-        self.l_several_phase_count_iterations.setHidden(True)
-        self.sb_several_phase_count_iterations.setHidden(True)
 
     def _enable_regular_polygon(self) -> None:
         """
@@ -288,8 +349,6 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         :return:
         """
         self.l_image.setPixmap(QtGui.QPixmap("./static/single_phase_model.png"))
-        self.l_single_phase_count_iterations.setHidden(False)
-        self.sb_single_phase_count_iterations.setHidden(False)
         self.lb_regular_polygon_count_angle.setHidden(False)
         self.sb_regular_polygon_count_angle.setHidden(False)
         self.rb_regular_polygon_build_inside.setHidden(False)
@@ -298,8 +357,6 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dsb_several_phase_coefficient_a.setHidden(True)
         self.l_several_phase_coefficient_h.setHidden(True)
         self.dsb_several_phase_coefficient_h.setHidden(True)
-        self.l_several_phase_count_iterations.setHidden(True)
-        self.sb_several_phase_count_iterations.setHidden(True)
 
     def _make_screenshot(self) -> None:
         """
@@ -324,6 +381,20 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         if len(preview) > 20:
             preview = preview[:20] + "..."
         self.pb_screenshot_path.setText(preview)
+
+    def _plot_graph_line_len(self) -> None:
+        """
+
+        :return:
+        """
+        self.one_phase_window.show()
+
+    def _plot_graph_scale(self) -> None :
+        """
+
+        :return:
+        """
+        self.several_phases_window.show()
 
     def _plot_graph_line_len_one_and_several_phases(self) -> None:
         """
@@ -400,46 +471,6 @@ class Application(QtWidgets.QMainWindow, Ui_MainWindow):
         plt.legend(fontsize=30)
         plt.show()
 
-    # TODO: approximation
-    @is_calculations_absent
-    def _plot_graph_scale(self):
-        """
-        # TODO: docstring
-        :return:
-        """
-        # TODO: to name this shirt
-        y_x_train = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(min(line.start.x, line.finish.x) for line in lines)) for lines in self.koch_curve.lines]
-        y_x = [value for i, value in enumerate(y_x_train)
-               if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
-        y_y_train = [abs(max(max(line.start.y, line.finish.y) for line in lines) -
-                 min(min(line.start.y, line.finish.y) for line in lines)) for lines in self.koch_curve.lines]
-        y_y = [value for i, value in enumerate(y_y_train)
-               if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
-        x_train = [i for i in range(len(self.koch_curve.lines))]
-        x = [i for i in range(len(self.koch_curve.lines)) if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
-
-        y_x_train = np.array(y_x_train)
-        y_x = np.array(y_x)
-        y_y_train = np.array(y_y_train)
-        y_y = np.array(y_y)
-        x_train = np.array(x_train)
-        x = np.array(x)
-
-        [a_y_x, b_y_x], _ = curve_fit(lambda x1, a, b: a * np.exp(b * x1), x_train, y_x_train, p0=[0.01285, 0.0351])
-        [a_y_y, b_y_y], _ = curve_fit(lambda x1, a, b: a * np.exp(b * x1), x_train, y_y_train, p0=[0.01285, 0.0351])
-
-        y1_x = a_y_x * np.exp(b_y_x * x_train)
-        y2_y = a_y_y * np.exp(b_y_y * x_train)
-
-        fig, ax = plt.subplots()
-        ax.plot(x, y_x, 'x', markersize=8, markeredgewidth=3, label='Значение размаха фрактала по oX от его глубины', c='black')
-        ax.plot(x_train, y1_x, linestyle="--", label='Размах фрактала по oX', c='black')
-        ax.plot(x, y_y, 'x', markersize=8, markeredgewidth=3, label='Значение размаха фрактала по oY от его глубины', c='black')
-        ax.plot(x_train, y2_y, linestyle=":", label='Размах фрактала по oY', c='black')
-        ax.grid(True)
-        ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
-        ax.set(xlabel='Число циклов роста фрактала, ед.', ylabel='Размах фрактала, ед.')
-        plt.show()
 
     def _plot_graph_scale_one_and_several_phases(self):
         """
