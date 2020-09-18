@@ -3,19 +3,18 @@ import pygame
 import sys  # sys нужен для передачи argv в QApplication
 from PyQt5 import QtWidgets, QtGui, QtCore
 from ui.main_window import Ui_MainWindow as UiMainWindow
-from ui.one_phase_window import Ui_MainWindow as UiOnePhase
+from ui.single_phase_window import Ui_MainWindow as UiOnePhase
 from ui.several_phases_window import Ui_MainWindow as UiSeveralPhases
+from ui.polygon_window import Ui_MainWindow as UiPolygon
+from ui.one_and_several_phases_window import Ui_MainWindow as UiOneAndSeveralPhases
 from OpenGL.GL import *
 # from OpenGL.GLU import *
 from geometry.entity_2d import Segment
 from fractals.koch.curve import Curve
 from PIL import Image, ImageOps
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-import numpy as np
 from functools import wraps
 from pathlib import Path
-from analytics.graphs import plot_graph_line_len, plot_graph_scale
+from analytics.graphs import plot_graph_line_len, plot_graph_scale, plot_graph_line_len_one_and_several_phases, plot_graph_angle
 
 SCROLL_UP = 4
 SCROLL_DOWN = 5
@@ -60,7 +59,7 @@ class OnePhaseApp(QtWidgets.QMainWindow, UiOnePhase):
         super().__init__()
         self.setupUi(self)
 
-        self.koch_curve = None
+        self.graph_type = None
 
         # make default settings
         self.l_image.setPixmap(QtGui.QPixmap('./static/single_phase_model.png'))
@@ -79,12 +78,24 @@ class OnePhaseApp(QtWidgets.QMainWindow, UiOnePhase):
             'count_iterations': self.sb_count_iterations.value()
         }
 
-        self.koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                                **settings)
-        self.koch_curve.build()
+        single_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                   self.dsb_angle.value(), **settings)
+        single_phase_model.build()
 
-        # escape line growth phases, so lines = lines[count_iter:]
-        plot_graph_line_len(self.koch_curve.lines[self.sb_count_iterations.value():], self.sb_count_iterations.value())
+        if self.graph_type == 'len':
+            # escape line growth phases, so lines = lines[count_iter:]
+            plot_graph_line_len(single_phase_model.lines[self.sb_count_iterations.value():],
+                                self.sb_count_iterations.value())
+        elif self.graph_type == 'scale':
+            # escape line growth phases, so lines = lines[count_iter:]
+            plot_graph_scale(single_phase_model.lines[self.sb_count_iterations.value():],
+                             self.sb_count_iterations.value())
+        elif self.graph_type == 'angle':
+            # escape line growth phases, so lines = lines[count_iter:]
+            plot_graph_angle(single_phase_model.lines[self.sb_count_iterations.value():],
+                             self.sb_count_iterations.value(), self.dsb_angle.value())
+        else:
+            raise TypeError('unknown graph type')
 
 
 class SeveralPhasesApp(QtWidgets.QMainWindow, UiSeveralPhases):
@@ -92,7 +103,7 @@ class SeveralPhasesApp(QtWidgets.QMainWindow, UiSeveralPhases):
         super().__init__()
         self.setupUi(self)
 
-        self.koch_curve = None
+        self.graph_type = None
 
         # make default settings
         self.l_image.setPixmap(QtGui.QPixmap('./static/several_phases_model.png'))
@@ -112,12 +123,97 @@ class SeveralPhasesApp(QtWidgets.QMainWindow, UiSeveralPhases):
             'coefficient_h': self.dsb_several_phase_coefficient_h.value()
         }
 
-        self.koch_curve = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                                **settings)
-        self.koch_curve.build()
+        several_phases_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                     self.dsb_angle.value(), **settings)
+        several_phases_model.build()
 
         # escape line growth phases, so lines = lines[count_iter:]
-        plot_graph_scale(self.koch_curve.lines[self.sb_count_iterations.value():], self.sb_count_iterations.value())
+        plot_graph_scale(several_phases_model.lines[self.sb_count_iterations.value():],
+                         self.sb_count_iterations.value())
+
+
+class PolygonApp(QtWidgets.QMainWindow, UiPolygon):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+
+        self.graph_type = None
+
+        # make default settings
+        # TODO: pictures
+        self.l_image.setPixmap(QtGui.QPixmap('./static/several_phases_model.png'))
+
+        # callbacks
+        self.pb_calculate_fractal.clicked.connect(self._calculate)
+
+    def _calculate(self) -> None:
+        """
+
+        :return:
+        """
+        settings = {
+            'model': 'regular_polygon',
+            'count_iterations': self.sb_count_iterations.value(),
+            'count_angles': self.sb_regular_polygon_count_angle.value(),
+            'building_way': "inside" if self.rb_regular_polygon_build_inside.isChecked() else "outside"
+        }
+
+        regular_polygon_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                      self.dsb_angle.value(), **settings)
+        regular_polygon_model.build()
+
+        # escape line growth phases, so lines = lines[count_iter:]
+        plot_graph_scale(regular_polygon_model.lines[self.sb_count_iterations.value():],
+                         self.sb_count_iterations.value())
+
+
+class OneAndSeveralPhasesApp(QtWidgets.QMainWindow, UiOneAndSeveralPhases):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+
+        self.graph_type = None
+
+        # make default settings
+        self.lb_image_one_phase.setPixmap(QtGui.QPixmap('./static/single_phase_model.png'))
+        self.lb_image_several_phases.setPixmap(QtGui.QPixmap('./static/several_phases_model.png'))
+
+        # callbacks
+        self.pb_calculate_fractal.clicked.connect(self._calculate)
+
+    def _calculate(self) -> None:
+        """
+
+        :return:
+        """
+        settings = dict()
+        settings["model"] = "single"
+        settings["count_iterations"] = self.sb_count_iterations.value()
+        single_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                   self.dsb_angle.value(), **settings)
+        single_phase_model.build()
+
+        settings["model"] = "several"
+        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+        settings["count_iterations"] = int(self.sb_count_iterations.value())
+        several_phase_model_1 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                      self.dsb_angle.value(), **settings)
+        several_phase_model_1.build()
+
+        settings["count_iterations"] = int(self.sb_count_iterations.value() - 30)
+        several_phase_model_2 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
+                                      self.dsb_angle.value(), **settings)
+        several_phase_model_2.build()
+
+        # escape line growth phases, so lines = lines[count_iter:] and ect
+        plot_graph_line_len_one_and_several_phases(
+            single_phase_model.lines[self.sb_count_iterations.value():],
+            several_phase_model_1.lines[self.sb_count_iterations.value():],
+            several_phase_model_2.lines[self.sb_count_iterations.value() - 30:],
+            self.sb_count_iterations.value(),
+            self.dsb_max_line_legth.value()
+        )
 
 
 class Application(QtWidgets.QMainWindow, UiMainWindow):
@@ -143,8 +239,10 @@ class Application(QtWidgets.QMainWindow, UiMainWindow):
         self.l_several_phase_coefficient_h.setHidden(True)
         self.dsb_several_phase_coefficient_h.setHidden(True)
 
-        self.one_phase_window = OnePhaseApp()
+        self.single_phase_window = OnePhaseApp()
         self.several_phases_window = SeveralPhasesApp()
+        self.regular_polygon_window = PolygonApp()
+        self.single_and_several_phases_window = OneAndSeveralPhasesApp()
 
         pygame.init()
 
@@ -160,11 +258,23 @@ class Application(QtWidgets.QMainWindow, UiMainWindow):
         self.rb_regular_polygon.clicked.connect(self._enable_regular_polygon)
         self.cb_screenshot.clicked.connect(self._make_screenshot)
         self.pb_screenshot_path.clicked.connect(self._choose_file_path)
-        self.pb_graph_line_len.clicked.connect(self._plot_graph_line_len)
-        self.pb_graph_line_len_one_and_several_phases.clicked.connect(self._plot_graph_line_len_one_and_several_phases)
-        self.pb_graph_scale.clicked.connect(self._plot_graph_scale)
-        self.pb_graph_scale_one_and_several_phases.clicked.connect(self._plot_graph_scale_one_and_several_phases)
-        self.pb_graph_angle.clicked.connect(self._plot_graph_angle)
+
+        # graphs
+        # fractal len
+        self.pb_graph_line_len_single_phase.clicked.connect(self._plot_line_len_single_phase)
+        self.pb_graph_line_len_several_phases.clicked.connect(self._plot_line_len_several_phases)
+        self.pb_graph_line_len_regular_polygon.clicked.connect(self._plot_line_len_polygon)
+        # fractal span
+        self.pb_graph_fractal_span_single_phase.clicked.connect(self._plot_fractal_span_single_phase)
+        self.pb_graph_fractal_span_several_phases.clicked.connect(self._plot_fractal_span_several_phases)
+        self.pb_graph_fractal_span_regular_polygon.clicked.connect(self._plot_fractal_span_polygon)
+        # angles in polar system
+        self.pb_graph_angle_single_phase.clicked.connect(self._plot_angle_single_phase)
+        self.pb_graph_angle_several_phases.clicked.connect(self._plot_angle_several_phases)
+        self.pb_graph_angle_regular_polygon.clicked.connect(self._plot_angle_polygon)
+        # mix
+        # self.pb_graph_line_len_single_and_several_phases.clicked.connect(self._plot_line_len_single_and_several_phases)
+        # self.pb_graph_fractal_span_one_and_several_phases.clicked.connect(None)
 
     def _calculation_fractal(self):
         """
@@ -382,204 +492,85 @@ class Application(QtWidgets.QMainWindow, UiMainWindow):
             preview = preview[:20] + "..."
         self.pb_screenshot_path.setText(preview)
 
-    def _plot_graph_line_len(self) -> None:
+    def _plot_line_len_single_phase(self) -> None:
         """
 
         :return:
         """
-        self.one_phase_window.show()
+        self.single_phase_window.graph_type = 'len'
+        self.single_phase_window.show()
 
-    def _plot_graph_scale(self) -> None :
+    def _plot_line_len_several_phases(self) -> None:
         """
 
         :return:
         """
+        self.several_phases_window.graph_type = 'len'
         self.several_phases_window.show()
 
-    def _plot_graph_line_len_one_and_several_phases(self) -> None:
+    def _plot_line_len_polygon(self) -> None:
+        """
+
+        :return:
+        """
+        self.regular_polygon_window.graph_type = 'len'
+        self.regular_polygon_window.show()
+
+    def _plot_fractal_span_single_phase(self) -> None:
+        """
+
+        :return:
+        """
+        self.single_phase_window.graph_type = 'span'
+        self.single_phase_window.show()
+
+    def _plot_fractal_span_several_phases(self) -> None:
+        """
+
+        :return:
+        """
+        self.several_phases_window.graph_type = 'span'
+        self.several_phases_window.show()
+
+    def _plot_fractal_span_polygon(self) -> None:
+        """
+
+        :return:
+        """
+        self.regular_polygon_window.graph_type = 'span'
+        self.regular_polygon_window.show()
+
+    def _plot_angle_single_phase(self) -> None:
+        """
+
+        :return:
+        """
+        self.single_phase_window.graph_type = 'angle'
+        self.single_phase_window.show()
+
+    def _plot_angle_several_phases(self) -> None:
+        """
+
+        :return:
+        """
+        self.several_phases_window.graph_type = 'angle'
+        self.several_phases_window.show()
+
+    def _plot_angle_polygon(self) -> None:
+        """
+
+        :return:
+        """
+        self.regular_polygon_window.graph_type = 'angle'
+        self.regular_polygon_window.show()
+
+    def _plot_line_len_single_and_several_phases(self) -> None:
         """
 
         :return:
         """
 
-        settings = dict()
-        settings["model"] = "single"
-        settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
-        one_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                                **settings)
-        one_phase_model.build()
-
-        settings["model"] = "irregular"
-        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value())
-        several_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
-                                    self.dsb_angle.value(), **settings)
-        several_phase_model.build()
-
-        settings["model"] = "irregular"
-        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 30)
-        several_phase_model_2 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
-                                      self.dsb_angle.value(), **settings)
-        several_phase_model_2.build()
-
-        # TODO: to name this shirt
-        line_lens_train_single = [sum(line.len() for line in lines) for lines in one_phase_model.lines]
-        # delete points of line growth
-        line_lens_train_single = line_lens_train_single[self.sb_single_phase_count_iterations.value():]
-        x_x_train = [i for i in range(len(line_lens_train_single))]
-        y_y_train = line_lens_train_single[:]
-
-        y3_y = np.array([self.dsb_max_line_legth.value() * 4 ** ((i + 1) / self.sb_several_phase_count_iterations.value())
-                         for i in range(len(line_lens_train_single))])
-
-        line_lens_train_single = [(i, value) for i, value in enumerate(line_lens_train_single)
-                                 if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
-        x_train_single = [pair[0] for pair in line_lens_train_single]
-        line_lens_train_single = [pair[1] for pair in line_lens_train_single]
-
-        line_lens_train_several = [sum(line.len() for line in lines) for lines in several_phase_model.lines]
-        # delete points of line growth
-        line_lens_train_several = line_lens_train_several[self.sb_several_phase_count_iterations.value():]
-        x_train_several = [i for i in range(len(line_lens_train_several))]
-
-        line_lens_train_several_2 = [sum(line.len() for line in lines) for lines in several_phase_model_2.lines]
-        # delete points of line growth
-        line_lens_train_several_2 = line_lens_train_several_2[self.sb_several_phase_count_iterations.value() - 30:]
-        x_train_several_2 = [i for i in range(len(line_lens_train_several_2))]
-
-        fig, ax = plt.subplots()
-        ax.plot(x_x_train, y_y_train, label=r'$a$', c='black', linewidth=5)
-        ax.plot(x_train_several, line_lens_train_several, linestyle=":", label=r'$b$', c='black', linewidth=5)
-        ax.plot(x_train_several_2, line_lens_train_several_2, linestyle="--", label=r'$c$', c='black', linewidth=5)
-        ax.plot(x_train_single, line_lens_train_single, 's', markersize=10, markeredgewidth=3, label=r'$f_1$', c='black')
-        # ax.plot([i for i in range(len(y3_y))], y3_y, linestyle="-", label=r'$f_1$', c='black', linewidth=2)
-        ax.set_xlim(xmin=100)
-        ax.set_ylim(ymin=-50)
-        ax.grid(True)
-        ax.legend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
-        ax.set(xlabel='Число циклов роста, ед.', ylabel='Длина фрактальной линии, ед.')
-
-        # setting label sizes after creation
-        ax.xaxis.label.set_size(30)
-        ax.yaxis.label.set_size(30)
-
-        plt.xticks(fontsize=30)
-        plt.yticks(fontsize=30)
-        plt.legend(fontsize=30)
-        plt.show()
-
-
-    def _plot_graph_scale_one_and_several_phases(self):
-        """
-
-        :return:
-        """
-        settings = dict()
-        settings["model"] = "single"
-        settings["count_iterations"] = self.sb_single_phase_count_iterations.value()
-        one_phase_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(), self.dsb_angle.value(),
-                                **settings)
-        one_phase_model.build()
-
-        wingspan_train_single_2 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
-            min(line.start.x, line.finish.x) for line in lines)) for lines in one_phase_model.lines]
-        # delete points of line growth
-        wingspan_train_single_2 = wingspan_train_single_2[self.sb_single_phase_count_iterations.value():]
-        x_train_single_2 = [i for i in range(len(wingspan_train_single_2))]
-
-        settings["model"] = "irregular"
-        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        settings["count_iterations"] = self.sb_several_phase_count_iterations.value()
-        several_phase_model_1 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
-                                    self.dsb_angle.value(), **settings)
-        several_phase_model_1.build()
-
-        wingspan_train_several_1 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
-            min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model_1.lines]
-        # delete points of line growth
-        wingspan_train_several_1 = wingspan_train_several_1[self.sb_several_phase_count_iterations.value():]
-        x_train_several_1 = [i for i in range(len(wingspan_train_several_1))]
-        print("First calculation is over")
-
-        settings["model"] = "irregular"
-        settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
-        settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
-        settings["count_iterations"] = int(self.sb_several_phase_count_iterations.value() - 30)
-        several_phase_model_2 = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),
-                                      self.dsb_angle.value(), **settings)
-        several_phase_model_2.build()
-
-        wingspan_train_several_2 = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
-            min(line.start.x, line.finish.x) for line in lines)) for lines in several_phase_model_2.lines]
-        # delete points of line growth
-        wingspan_train_several_2 = wingspan_train_several_2[self.sb_several_phase_count_iterations.value() - 30:]
-        x_train_several_2 = [i for i in range(len(wingspan_train_several_2))]
-        print("Second calculation is over")
-
-        # TODO: to name this shirt
-        wingspan_train_single = [abs(max(max(line.start.x, line.finish.x) for line in lines) - min(
-            min(line.start.x, line.finish.x) for line in lines)) for lines in one_phase_model.lines]
-        # delete points of line growth
-        wingspan_train_single = wingspan_train_single[self.sb_single_phase_count_iterations.value():]
-
-        import math
-        y3_y = np.array([self.dsb_max_line_legth.value() * ((2 + 2 * math.cos(np.deg2rad(self.dsb_angle.value()))) ** (
-                (i + 1) / self.sb_several_phase_count_iterations.value())) for i in range(len(wingspan_train_single))])
-
-        wingspan_train_single = [(i, value) for i, value in enumerate(wingspan_train_single)
-                                 if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
-        x_train_single = [pair[0] for pair in wingspan_train_single]
-        wingspan_train_single = [pair[1] for pair in wingspan_train_single]
-
-        fig, ax = plt.subplots()
-        fig.set_size_inches(18.5, 10.5)
-        ax.plot(x_train_single_2, wingspan_train_single_2, label=r'$a$', c='black', linewidth=5)
-        ax.plot(x_train_several_1, wingspan_train_several_1, linestyle=":", label=r'$b$', c='black', linewidth=5)
-        ax.plot(x_train_several_2, wingspan_train_several_2, linestyle="--", label=r'$c$', c='black', linewidth=5)
-        ax.plot(x_train_single, wingspan_train_single, 's', markersize=10, markeredgewidth=3, label=r'$f_2$', c='black')
-        ax.set_xlim(xmin=5)
-        ax.set_ylim(ymin=-25)
-        ax.grid(True)
-        ax.legend(loc='lower right', fancybox=True, framealpha=1, shadow=True, borderpad=1)
-        ax.set(xlabel='Число циклов роста, ед.', ylabel='Размах фрактала, ед.')
-
-        # setting label sizes after creation
-        ax.xaxis.label.set_size(30)
-        ax.yaxis.label.set_size(30)
-
-        plt.xticks(fontsize=30)
-        plt.yticks(fontsize=30)
-        plt.legend(fontsize=30)
-        plt.show()
-
-    @is_calculations_absent
-    def _plot_graph_angle(self):
-        """
-        # TODO: docstring
-        :return:
-        """
-        eps = 0.2
-        theta = [[np.deg2rad(line.get_triangle_angle()) for line in lines] for i, lines in enumerate(self.koch_curve.lines) if i % (self.sb_single_phase_count_iterations.value() - 1) == 0]
-        theta = theta[1:]
-        r = [1 + n * eps for n in range(len(theta))]
-        ax = plt.subplot(111, polar=True)
-        for i in range(len(r)):
-            ax.scatter(theta[i], [r[i] for _ in range(len(theta[i]))], alpha=1, linewidths=2.5, c='black')
-        ax.set_rmax(2.5)
-        rings = [i * 0.25 for i in range(11)]
-        rings_labels = ["1" if value == 1.0 else "" for value in rings]
-        plt.rgrids(rings, rings_labels)
-        ax.grid(True)
-
-        plt.xticks(fontsize=30)
-        plt.yticks(fontsize=30)
-        ax.set_title(r'$\beta=' + str(int(self.dsb_angle.value())) + r'°$', va='bottom', fontsize=30)
-
-        plt.show()
+        self.single_and_several_phases_window.show()
 
     @staticmethod
     # TODO: make common method with draw points
