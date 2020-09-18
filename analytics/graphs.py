@@ -5,7 +5,7 @@ from typing import List
 from geometry.entity_2d import Segment
 
 
-def plot_graph_line_len(lines: List[List[Segment]], count_iterations: int) -> None:
+def plot_line_len(lines: List[List[Segment]], count_iterations: int) -> None:
     """
     Формирование графика зависимости длины фрактальной линии от числа циклов роста.
     :param lines: Список промежуточных фаз роста (списков отрезков) фрактальной структуры.
@@ -30,7 +30,7 @@ def plot_graph_line_len(lines: List[List[Segment]], count_iterations: int) -> No
     plt.show()
 
 
-def plot_graph_scale(lines: List[List[Segment]], count_iterations: int) -> None:
+def plot_scale(lines: List[List[Segment]], count_iterations: int) -> None:
     """
     Формирование графика зависимости величина размаха фрактала от числа циклов роста.
     :param lines: Список промежуточных фаз роста (списков отрезков) фрактальной структуры.
@@ -73,7 +73,36 @@ def plot_graph_scale(lines: List[List[Segment]], count_iterations: int) -> None:
     plt.show()
 
 
-def plot_graph_line_len_one_and_several_phases(
+def plot_angle(lines: List[List[Segment]], count_iterations: int, angle: float):
+    """
+    :param lines: Список промежуточных фаз роста (списков отрезков) фрактальной структуры.
+    :param count_iterations: Количество циклов роста отрезка а.
+    :param angle: Угол равнобедренного треугольника базовой треугольной струкутры.
+    :return:
+    """
+
+    eps = 0.2
+    theta = [[np.deg2rad(line.get_triangle_angle()) for line in lines] for i, lines in enumerate(lines)
+             if i % (count_iterations - 1) == 0]
+    theta = theta[1:]
+    r = [1 + n * eps for n in range(len(theta))]
+    ax = plt.subplot(111, polar=True)
+    for i in range(len(r)):
+        ax.scatter(theta[i], [r[i] for _ in range(len(theta[i]))], alpha=1, linewidths=2.5, c='black')
+    ax.set_rmax(2.5)
+    rings = [i * 0.25 for i in range(11)]
+    rings_labels = ["1" if value == 1.0 else "" for value in rings]
+    plt.rgrids(rings, rings_labels)
+    ax.grid(True)
+
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
+    ax.set_title(r'$\beta=' + str(int(angle)) + r'°$', va='bottom', fontsize=30)
+
+    plt.show()
+
+
+def plot_line_len_single_several_phases(
         one_phase_segments: List[List[Segment]],
         several_phases_segments_1: List[List[Segment]],
         several_phases_segments_2: List[List[Segment]],
@@ -211,33 +240,4 @@ def plot_graph_scale_one_and_several_phases(self):
     plt.xticks(fontsize=30)
     plt.yticks(fontsize=30)
     plt.legend(fontsize=30)
-    plt.show()
-
-
-def plot_graph_angle(lines: List[List[Segment]], count_iterations: int, angle: float):
-    """
-    :param lines: Список промежуточных фаз роста (списков отрезков) фрактальной структуры.
-    :param count_iterations: Количество циклов роста отрезка а.
-    :param angle: Угол равнобедренного треугольника базовой треугольной струкутры.
-    :return:
-    """
-
-    eps = 0.2
-    theta = [[np.deg2rad(line.get_triangle_angle()) for line in lines] for i, lines in enumerate(lines)
-             if i % (count_iterations - 1) == 0]
-    theta = theta[1:]
-    r = [1 + n * eps for n in range(len(theta))]
-    ax = plt.subplot(111, polar=True)
-    for i in range(len(r)):
-        ax.scatter(theta[i], [r[i] for _ in range(len(theta[i]))], alpha=1, linewidths=2.5, c='black')
-    ax.set_rmax(2.5)
-    rings = [i * 0.25 for i in range(11)]
-    rings_labels = ["1" if value == 1.0 else "" for value in rings]
-    plt.rgrids(rings, rings_labels)
-    ax.grid(True)
-
-    plt.xticks(fontsize=30)
-    plt.yticks(fontsize=30)
-    ax.set_title(r'$\beta=' + str(int(angle)) + r'°$', va='bottom', fontsize=30)
-
     plt.show()

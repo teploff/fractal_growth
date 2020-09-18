@@ -216,7 +216,7 @@
             </layout>
            </item>
            <item>
-            <widget class="QLabel" name="l_image">
+            <widget class="QLabel" name="lb_image">
              <property name="text">
               <string>Image</string>
              </property>

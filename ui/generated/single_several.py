@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'one_and_several_phases_window.ui'
+# Form implementation generated from reading ui file 'ui/static/single_several.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #
@@ -104,10 +104,10 @@ class Ui_MainWindow(object):
         self.dsb_angle.setObjectName("dsb_angle")
         self.horizontalLayout_6.addWidget(self.dsb_angle)
         self.verticalLayout.addLayout(self.horizontalLayout_6)
-        self.lb_image_one_phase = QtWidgets.QLabel(self.groupBox)
-        self.lb_image_one_phase.setAlignment(QtCore.Qt.AlignCenter)
-        self.lb_image_one_phase.setObjectName("lb_image_one_phase")
-        self.verticalLayout.addWidget(self.lb_image_one_phase)
+        self.lb_image_single_phase = QtWidgets.QLabel(self.groupBox)
+        self.lb_image_single_phase.setAlignment(QtCore.Qt.AlignCenter)
+        self.lb_image_single_phase.setObjectName("lb_image_single_phase")
+        self.verticalLayout.addWidget(self.lb_image_single_phase)
         self.horizontalLayout.addWidget(self.groupBox)
         self.groupBox_2 = QtWidgets.QGroupBox(self.centralWidget)
         self.groupBox_2.setObjectName("groupBox_2")
@@ -195,7 +195,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "<html><head/><body><p>Max значение длины отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
         self.l_count_iterations.setText(_translate("MainWindow", "<html><head/><body><p>Количество итераций роста отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
         self.label_9.setText(_translate("MainWindow", "Значение угла треугольника"))
-        self.lb_image_one_phase.setText(_translate("MainWindow", "Image"))
+        self.lb_image_single_phase.setText(_translate("MainWindow", "Image"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Настройки для многофазной модели"))
         self.l_several_phase_coefficient_a.setText(_translate("MainWindow", "<html><head/><body><p>Коэффициент начальной длины отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
         self.l_several_phase_coefficient_h.setText(_translate("MainWindow", "<html><head/><body><p>Коэффициент начальной длины отрезка <span style=\" font-style:italic;\">h</span></p></body></html>"))

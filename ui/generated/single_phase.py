@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'single_phase_window.ui'
+# Form implementation generated from reading ui file 'ui/static/single_phase.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #
@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(353, 263)
+        MainWindow.resize(353, 268)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralWidget)
@@ -90,10 +90,10 @@ class Ui_MainWindow(object):
         self.sb_count_iterations.setObjectName("sb_count_iterations")
         self.horizontalLayout_26.addWidget(self.sb_count_iterations)
         self.verticalLayout.addLayout(self.horizontalLayout_26)
-        self.l_image = QtWidgets.QLabel(self.centralWidget)
-        self.l_image.setAlignment(QtCore.Qt.AlignCenter)
-        self.l_image.setObjectName("l_image")
-        self.verticalLayout.addWidget(self.l_image)
+        self.lb_image = QtWidgets.QLabel(self.centralWidget)
+        self.lb_image.setAlignment(QtCore.Qt.AlignCenter)
+        self.lb_image.setObjectName("lb_image")
+        self.verticalLayout.addWidget(self.lb_image)
         self.pb_calculate_fractal = QtWidgets.QPushButton(self.centralWidget)
         self.pb_calculate_fractal.setObjectName("pb_calculate_fractal")
         self.verticalLayout.addWidget(self.pb_calculate_fractal)
@@ -119,5 +119,5 @@ class Ui_MainWindow(object):
         self.label_11.setText(_translate("MainWindow", "Значение угла треугольника"))
         self.label_6.setText(_translate("MainWindow", "Max значение длины отрезка"))
         self.l_single_phase_count_iterations_3.setText(_translate("MainWindow", "<html><head/><body><p>Количество итераций роста отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
-        self.l_image.setText(_translate("MainWindow", "Image"))
+        self.lb_image.setText(_translate("MainWindow", "Image"))
         self.pb_calculate_fractal.setText(_translate("MainWindow", "Вычислить"))

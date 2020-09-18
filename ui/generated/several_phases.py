@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'several_phases_window.ui'
+# Form implementation generated from reading ui file 'ui/static/several_phases.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #
@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(389, 331)
+        MainWindow.resize(389, 332)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralWidget)
@@ -90,10 +90,10 @@ class Ui_MainWindow(object):
         self.dsb_angle.setObjectName("dsb_angle")
         self.horizontalLayout_10.addWidget(self.dsb_angle)
         self.verticalLayout.addLayout(self.horizontalLayout_10)
-        self.l_image = QtWidgets.QLabel(self.centralWidget)
-        self.l_image.setAlignment(QtCore.Qt.AlignCenter)
-        self.l_image.setObjectName("l_image")
-        self.verticalLayout.addWidget(self.l_image)
+        self.lb_image = QtWidgets.QLabel(self.centralWidget)
+        self.lb_image.setAlignment(QtCore.Qt.AlignCenter)
+        self.lb_image.setObjectName("lb_image")
+        self.verticalLayout.addWidget(self.lb_image)
         self.horizontalLayout_21 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_21.setSpacing(6)
         self.horizontalLayout_21.setObjectName("horizontalLayout_21")
@@ -155,7 +155,7 @@ class Ui_MainWindow(object):
         self.label_4.setText(_translate("MainWindow", "<html><head/><body><p>Max значение длины отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
         self.l_single_phase_count_iterations_2.setText(_translate("MainWindow", "<html><head/><body><p>Количество итераций роста отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
         self.label_10.setText(_translate("MainWindow", "Значение угла треугольника"))
-        self.l_image.setText(_translate("MainWindow", "Image"))
+        self.lb_image.setText(_translate("MainWindow", "Image"))
         self.l_several_phase_coefficient_a_2.setText(_translate("MainWindow", "<html><head/><body><p>Коэффициент начальной длины отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
         self.l_several_phase_coefficient_h_2.setText(_translate("MainWindow", "<html><head/><body><p>Коэффициент начальной длины отрезка <span style=\" font-style:italic;\">h</span></p></body></html>"))
         self.pb_calculate_fractal.setText(_translate("MainWindow", "Вычислить"))

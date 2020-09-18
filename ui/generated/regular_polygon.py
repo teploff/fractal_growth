@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'polygon_window.ui'
+# Form implementation generated from reading ui file 'ui/static/regular_polygon.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #
@@ -95,10 +95,10 @@ class Ui_MainWindow(object):
         self.dsb_angle.setObjectName("dsb_angle")
         self.horizontalLayout_6.addWidget(self.dsb_angle)
         self.verticalLayout.addLayout(self.horizontalLayout_6)
-        self.l_image = QtWidgets.QLabel(self.centralWidget)
-        self.l_image.setAlignment(QtCore.Qt.AlignCenter)
-        self.l_image.setObjectName("l_image")
-        self.verticalLayout.addWidget(self.l_image)
+        self.lb_image = QtWidgets.QLabel(self.centralWidget)
+        self.lb_image.setAlignment(QtCore.Qt.AlignCenter)
+        self.lb_image.setObjectName("lb_image")
+        self.verticalLayout.addWidget(self.lb_image)
         self.layout_regular_poygon = QtWidgets.QVBoxLayout()
         self.layout_regular_poygon.setSpacing(6)
         self.layout_regular_poygon.setObjectName("layout_regular_poygon")
@@ -157,7 +157,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "<html><head/><body><p>Max значение длины отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
         self.l_count_iterations.setText(_translate("MainWindow", "<html><head/><body><p>Количество итераций роста отрезка <span style=\" font-style:italic;\">a</span></p></body></html>"))
         self.label_9.setText(_translate("MainWindow", "Значение угла треугольника"))
-        self.l_image.setText(_translate("MainWindow", "Image"))
+        self.lb_image.setText(_translate("MainWindow", "Image"))
         self.lb_regular_polygon_count_angle.setText(_translate("MainWindow", "<html><head/><body><p>Количество углов правильной фигуры</p></body></html>"))
         self.rb_regular_polygon_build_outside.setText(_translate("MainWindow", "Строить снаружи"))
         self.rb_regular_polygon_build_inside.setText(_translate("MainWindow", "Строить внутрь"))

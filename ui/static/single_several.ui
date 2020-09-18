@@ -208,7 +208,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QLabel" name="lb_image_one_phase">
+          <widget class="QLabel" name="lb_image_single_phase">
            <property name="text">
             <string>Image</string>
            </property>
