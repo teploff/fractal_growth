@@ -41,7 +41,7 @@ class SinglePhaseUI(QMainWindow, Ui_MainWindow):
             # escape line growth phases, so lines = lines[count_iter:]
             plot_line_len(single_phase_model.lines[self.sb_count_iterations.value():],
                           self.sb_count_iterations.value())
-        elif self.graph_type == 'scale':
+        elif self.graph_type == 'span':
             # escape line growth phases, so lines = lines[count_iter:]
             plot_scale(single_phase_model.lines[self.sb_count_iterations.value():],
                        self.sb_count_iterations.value())

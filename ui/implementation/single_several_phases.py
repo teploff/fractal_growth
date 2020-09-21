@@ -55,7 +55,7 @@ class SingleSeveralPhasesUI(QMainWindow, Ui_MainWindow):
                 self.sb_count_iterations.value(),
                 self.dsb_max_line_legth.value()
             )
-        elif self.graph_type == 'scale':
+        elif self.graph_type == 'span':
             pass
         else:
             raise TypeError('unknown graph type')
