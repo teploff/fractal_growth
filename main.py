@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 
 from ui.main import MainUI
 
@@ -11,7 +11,7 @@ def main():
     window = MainUI()
     window.show()
 
-    app.exec_()
+    app.exec()
 
 
 if __name__ == '__main__':

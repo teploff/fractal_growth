@@ -1,5 +1,5 @@
-
 import unittest
+
 from geometry.entity_2d import Point, Segment
 
 

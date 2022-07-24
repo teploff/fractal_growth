@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import List, Tuple
 import pygame
-from PyQt5 import QtWidgets, QtGui
+from PyQt6 import QtWidgets, QtGui
 from OpenGL.GL import *
 from geometry.entity_2d import Segment
 from fractals.koch.curve import Curve
