@@ -6,3 +6,4 @@ build_uis:
 	pyuic5 ui/static/several_phases.ui -o ui/generated/several_phases.py ;\
 	pyuic5 ui/static/regular_polygon.ui -o ui/generated/regular_polygon.py ;\
 	pyuic5 ui/static/single_several.ui -o ui/generated/single_several.py ;\
+	pyuic5 ui/static/multifractal.ui -o ui/generated/multifractal.py ;\

@@ -39,7 +39,7 @@ def divide_into_two_equal_parts(p1, p2):
     return p1, (x, y), p2
 
 
-def increase_segment_length(segment: Segment, length: float) -> None:
+def increase_segment_length(segment: Segment, length: float, characteristic_exist: bool = False) -> None:
     """
     Увеличить длину отрезка segment на величину length.
     :param segment: Исходный отрезок
@@ -66,6 +66,12 @@ def increase_segment_length(segment: Segment, length: float) -> None:
         segment.start.y -= delta_l * math.sin((180.0 - angle) * math.pi / 180.0)
         segment.finish.x -= delta_l * math.cos((180.0 - angle) * math.pi / 180.0)
         segment.finish.y += delta_l * math.sin((180.0 - angle) * math.pi / 180.0)
+
+    if segment.cur_iter:
+        segment.cur_iter += 1
+
+    if characteristic_exist:
+        segment.weight += segment.dt_weight
 
 
 def engender_branch(bud: Point, length: float, angle: float) -> Point:

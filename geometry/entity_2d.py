@@ -1,4 +1,5 @@
 import math
+import uuid
 import numpy
 from typing import Union
 from geometry.const import ABSCISSA, ORDINATE, ACCURACY
@@ -27,16 +28,33 @@ class Segment:
     Класс отрезок, содержащая две точки: начальная и конечная.
     """
 
-    def __init__(self, start: Point, finish: Point):
+    def __init__(self, start: Point, finish: Point, weight: float = None, dt_length = None, dt_weight: float = None, max_weight: float = None, cur_iter: int = None, max_iter: int = None, depth: int = 0, max_length: float = None):
         """
         :param start: Начальная точка.
         :param finish: Конечная точка.
         """
+        self._id = str(uuid.uuid4())
 
         self.start, self.finish = start, finish
 
+        self.depth = depth
+
+        self.dt_length = dt_length
+        self.max_length = max_length
+
+        self.cur_iter = cur_iter
+        self.max_iter = max_iter
+
+        self.weight = weight
+        self.dt_weight = dt_weight
+        self.max_weight = max_weight
+
     def __repr__(self):
         return f'Start({self.start}), Finish{self.finish})'
+
+    @property
+    def id(self):
+        return self._id
 
     def len(self) -> float:
         """

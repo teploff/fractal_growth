@@ -31,7 +31,9 @@ class SeveralPhasesUI(QMainWindow, Ui_MainWindow):
             'model': 'several',
             'count_iterations': self.sb_count_iterations.value(),
             'coefficient_a': self.dsb_several_phase_coefficient_a.value(),
-            'coefficient_h': self.dsb_several_phase_coefficient_h.value()
+            'coefficient_h': self.dsb_several_phase_coefficient_h.value(),
+            'max_val': self.dsb_max_line_legth.value(),
+            'metamorphosis_angle': self.dsb_angle
         }
 
         several_phases_model = Curve(self.sb_fractal_depth.value(), self.dsb_max_line_legth.value(),

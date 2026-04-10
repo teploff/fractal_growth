@@ -15,6 +15,7 @@ from ui.implementation.single_phase import SinglePhaseUI
 from ui.implementation.several_phases import SeveralPhasesUI
 from ui.implementation.regular_polygon import RegularPolygonUI
 from ui.implementation.single_several_phases import SingleSeveralPhasesUI
+from ui.implementation.multifractal import MultifractalUI
 
 HEIGHT = 1000
 WIDTH = 1000
@@ -73,11 +74,14 @@ class MainUI(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dsb_several_phase_coefficient_a.setHidden(True)
         self.l_several_phase_coefficient_h.setHidden(True)
         self.dsb_several_phase_coefficient_h.setHidden(True)
-
+        self.label_6.setHidden(True)
+        self.sb_thinning_percentage.setHidden(True)
+        self.pb_thin_out.setHidden(True)
         self.single_phase_window = SinglePhaseUI()
         self.several_phases_window = SeveralPhasesUI()
         self.regular_polygon_window = RegularPolygonUI()
         self.single_and_several_phases_window = SingleSeveralPhasesUI()
+        self.multifractal_window = MultifractalUI()
 
         pygame.init()
 
@@ -90,6 +94,7 @@ class MainUI(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pb_background_color.clicked.connect(self._pick_background_color)
         self.rb_single_phase.clicked.connect(self._enable_single_phase)
         self.rb_several_phases.clicked.connect(self._several_phases)
+        self.rb_metamorphosis.clicked.connect(self._metamorphosis)
         self.rb_regular_polygon.clicked.connect(self._enable_regular_polygon)
         self.cb_screenshot.clicked.connect(self._make_screenshot)
         self.pb_screenshot_path.clicked.connect(self._choose_file_path)
@@ -99,6 +104,7 @@ class MainUI(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pb_graph_line_len_single_phase.clicked.connect(self._plot_line_len_single_phase)
         self.pb_graph_line_len_several_phases.clicked.connect(self._plot_line_len_several_phases)
         self.pb_graph_line_len_regular_polygon.clicked.connect(self._plot_line_len_polygon)
+        self.pb_graph_line_len_multifractal.clicked.connect(self._plot_line_len_multifractal)
         # fractal span
         self.pb_graph_fractal_span_single_phase.clicked.connect(self._plot_fractal_span_single_phase)
         self.pb_graph_fractal_span_several_phases.clicked.connect(self._plot_fractal_span_several_phases)
@@ -121,11 +127,26 @@ class MainUI(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.rb_single_phase.isChecked():
             settings["model"] = "single"
             settings["count_iterations"] = self.sb_count_iterations.value()
+            settings["max_val"] = self.dsb_max_line_legth.value()
         elif self.rb_several_phases.isChecked():
             settings["model"] = "several"
             settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
             settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
             settings["count_iterations"] = int(self.sb_count_iterations.value())
+            settings["max_val"] = self.dsb_max_line_legth.value()
+        elif self.rb_stochastic.isChecked():
+            settings["model"] = "stochastic"
+            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+            settings["count_iterations"] = int(self.sb_count_iterations.value())
+            settings["max_val"] = self.dsb_max_line_legth.value()
+        elif self.rb_metamorphosis.isChecked():
+            settings["model"] = "metamorphosis"
+            settings["coefficient_a"] = self.dsb_several_phase_coefficient_a.value()
+            settings["coefficient_h"] = self.dsb_several_phase_coefficient_h.value()
+            settings["count_iterations"] = int(self.sb_count_iterations.value())
+            settings['metamorphosis_angle'] = self.dsb_angle_for_metamorphosis.value()
+            settings["max_val"] = self.dsb_max_line_legth.value()
         else:
             settings["model"] = "regular_polygon"
             settings["count_iterations"] = self.sb_count_iterations.value()
@@ -289,6 +310,21 @@ class MainUI(QtWidgets.QMainWindow, Ui_MainWindow):
         self.l_several_phase_coefficient_h.setHidden(False)
         self.dsb_several_phase_coefficient_h.setHidden(False)
 
+    def _metamorphosis(self) -> None:
+        """
+
+        :return:
+        :rtype:
+        """
+        self.lb_regular_polygon_count_angle.setHidden(True)
+        self.sb_regular_polygon_count_angle.setHidden(True)
+        self.rb_regular_polygon_build_inside.setHidden(True)
+        self.rb_regular_polygon_build_outside.setHidden(True)
+        self.l_several_phase_coefficient_a.setHidden(False)
+        self.dsb_several_phase_coefficient_a.setHidden(False)
+        self.l_several_phase_coefficient_h.setHidden(False)
+        self.dsb_several_phase_coefficient_h.setHidden(False)
+
     def _enable_regular_polygon(self) -> None:
         """
         Выбор построения правильной фигуры.
@@ -351,6 +387,14 @@ class MainUI(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         self.regular_polygon_window.graph_type = 'len'
         self.regular_polygon_window.show()
+
+    def _plot_line_len_multifractal(self) -> None:
+        """
+
+        :return:
+        """
+        self.multifractal_window.graph_type = 'len'
+        self.multifractal_window.show()
 
     def _plot_fractal_span_single_phase(self) -> None:
         """
