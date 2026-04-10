@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtGui import QPixmap
+from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtGui import QPixmap
 
 from analytics.graphs import plot_line_len_single_several_phases
 from fractals.koch.curve import Curve
